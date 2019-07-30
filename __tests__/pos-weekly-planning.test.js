@@ -1,9 +1,10 @@
-const disaggregatePosVolume = require("../src/pos-weekly-planning");
+const {disaggregatePosVolume, disaggregatePosVolumeByUplift }= require("../src/pos-weekly-planning");
 
 describe("Sales volume forecast for a plan with 1 SKU and 1 WEEK using POS:", () => {
   describe("Disaggregate weekly volume forecast to daily volume forecast using equal spread,", () => {
     describe("When total weekly volume forecast number is given,", () => {
       it("should return 7 equal daily volume when weekly volume is divisible by 7", () => {
+        weeklyPosVolume = 140
         dailyPosVolume = [
           { dayOfWeek: 1, posVolume: 20 },
           { dayOfWeek: 2, posVolume: 20 },
@@ -13,7 +14,7 @@ describe("Sales volume forecast for a plan with 1 SKU and 1 WEEK using POS:", ()
           { dayOfWeek: 6, posVolume: 20 },
           { dayOfWeek: 7, posVolume: 20 }
         ];
-        expect(disaggregatePosVolume(140)).toMatchObject(dailyPosVolume);
+        expect(disaggregatePosVolume(weeklyPosVolume)).toMatchObject(dailyPosVolume);
       });
 
       it("should equally allocate the remainder (1) when weekly volume is NOT divisible by 7", () => {
@@ -83,7 +84,18 @@ describe("Sales volume forecast for a plan with 1 SKU and 1 WEEK using POS:", ()
 
     describe("When % uplift on top of baseline volume is given,", () => {
       it("should return 7 equal daily volume when weekly volume is divisible by 7", () => {
-        
+        weeklyBaselinePosVolume = 100
+        weeklyPosVolumeUplift = 1.4
+        dailyPosVolume = [
+          { dayOfWeek: 1, posVolume: 20 },
+          { dayOfWeek: 2, posVolume: 20 },
+          { dayOfWeek: 3, posVolume: 20 },
+          { dayOfWeek: 4, posVolume: 20 },
+          { dayOfWeek: 5, posVolume: 20 },
+          { dayOfWeek: 6, posVolume: 20 },
+          { dayOfWeek: 7, posVolume: 20 }
+        ];
+        expect(disaggregatePosVolumeByUplift(weeklyBaselinePosVolume, weeklyPosVolumeUplift)).toMatchObject(dailyPosVolume);
       })
     })
   });
