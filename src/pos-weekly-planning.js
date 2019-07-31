@@ -1,44 +1,26 @@
-const disaggregatePosVolume = weeklyVolume => {
-  const dailyPosVolume = [
-    { dayOfWeek: 1, posVolume: 0 },
-    { dayOfWeek: 2, posVolume: 0 },
-    { dayOfWeek: 3, posVolume: 0 },
-    { dayOfWeek: 4, posVolume: 0 },
-    { dayOfWeek: 5, posVolume: 0 },
-    { dayOfWeek: 6, posVolume: 0 },
-    { dayOfWeek: 7, posVolume: 0 }
+const disaggregateVolume = totalVolume => {
+  const result = [
+    { dayOfWeek: 1, volume: 0 },
+    { dayOfWeek: 2, volume: 0 },
+    { dayOfWeek: 3, volume: 0 },
+    { dayOfWeek: 4, volume: 0 },
+    { dayOfWeek: 5, volume: 0 },
+    { dayOfWeek: 6, volume: 0 },
+    { dayOfWeek: 7, volume: 0 }
   ];
-  const volumeQuotient = Math.floor(weeklyVolume / 7);
-  let volumeRemainder = weeklyVolume % 7;
 
-  return dailyPosVolume.map(dayOfWeek => {
-    dayOfWeek.posVolume =
-      volumeRemainder > 0 ? volumeQuotient + 1 : volumeQuotient;
-    volumeRemainder -= 1;
+  const quotient = Math.floor(totalVolume / 7);
+  let remainder = totalVolume % 7;
+
+  return result.map(dayOfWeek => {
+    dayOfWeek.volume = remainder > 0 ? quotient + 1 : quotient;
+    remainder -= 1;
     return dayOfWeek;
   });
 };
 
-const disaggregatePosVolumeByUplift = (baselinePosVolume, uplift) => {
-  const dailyPosVolume = [
-    { dayOfWeek: 1, posVolume: 0 },
-    { dayOfWeek: 2, posVolume: 0 },
-    { dayOfWeek: 3, posVolume: 0 },
-    { dayOfWeek: 4, posVolume: 0 },
-    { dayOfWeek: 5, posVolume: 0 },
-    { dayOfWeek: 6, posVolume: 0 },
-    { dayOfWeek: 7, posVolume: 0 }
-  ];
-  const weeklyVolume = baselinePosVolume * uplift
-  const volumeQuotient = Math.floor(weeklyVolume / 7);
-  let volumeRemainder = weeklyVolume % 7;
-
-  return dailyPosVolume.map(dayOfWeek => {
-    dayOfWeek.posVolume =
-      volumeRemainder > 0 ? volumeQuotient + 1 : volumeQuotient;
-    volumeRemainder -= 1;
-    return dayOfWeek;
-  });
+const calculateTotalVolume = (baselineVolume, uplift) => {
+  return (totalVolume = baselineVolume * uplift);
 };
 
-module.exports = {disaggregatePosVolume, disaggregatePosVolumeByUplift};
+module.exports = { disaggregateVolume, calculateTotalVolume };
