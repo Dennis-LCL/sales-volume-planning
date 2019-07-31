@@ -88,6 +88,25 @@ describe("Sales volume forecast for a plan with 1 SKU and 1 WEEK using POS:", ()
     });
 
     describe("When % uplift on top of baseline volume is given,", () => {
+      describe("calculateTotalVolume function | Formula: Total Volume = Baseline Volume x Uplift %", () => {
+        it("should NOT round the Total Volume when the calculation result is a whole number", () => {
+          baselineVolume = 100;
+          uplift = 1.5;
+          expect(calculateTotalVolume(baselineVolume, uplift)).toBe(150);
+        });
+
+        it("should round the Total Volume when the calculation result is a float number (round up)", () => {
+          baselineVolume = 100;
+          uplift = 2.005;
+          expect(calculateTotalVolume(baselineVolume, uplift)).toBe(201);
+        });
+
+        it("should round the Total Volume when the calculation result is a float number (round down)", () => {
+          baselineVolume = 100;
+          uplift = 2.004;
+          expect(calculateTotalVolume(baselineVolume, uplift)).toBe(200);
+        });
+      });
       it("should return 7 equal daily volume when weekly volume is divisible by 7", () => {
         baselineVolume = 100;
         volumeUplift = 1.4;

@@ -20,7 +20,7 @@ const disaggregateVolume = totalVolume => {
 };
 
 const calculateTotalVolume = (baselineVolume, uplift) => {
-  return (totalVolume = baselineVolume * uplift);
+  return Math.round((totalVolume = baselineVolume * uplift));
 };
 
 module.exports = { disaggregateVolume, calculateTotalVolume };
