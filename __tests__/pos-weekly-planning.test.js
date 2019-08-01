@@ -3,126 +3,178 @@ const {
   calculateTotalVolume
 } = require("../src/pos-weekly-planning");
 
-describe("Sales volume forecast for a plan with 1 SKU and 1 WEEK using POS:", () => {
-  describe("Disaggregate weekly volume forecast to daily volume forecast using equal spread,", () => {
-    describe("When total weekly volume forecast number is given,", () => {
-      it("should return 7 equal daily volume when weekly volume is divisible by 7", () => {
-        weeklyPosVolume = 140;
-        dailyPosVolume = [
-          { dayOfWeek: 1, volume: 20 },
-          { dayOfWeek: 2, volume: 20 },
-          { dayOfWeek: 3, volume: 20 },
-          { dayOfWeek: 4, volume: 20 },
-          { dayOfWeek: 5, volume: 20 },
-          { dayOfWeek: 6, volume: 20 },
-          { dayOfWeek: 7, volume: 20 }
-        ];
-        expect(disaggregateVolume(weeklyPosVolume)).toMatchObject(
-          dailyPosVolume
-        );
-      });
+let baseline;
+let uplift;
+let method;
 
-      it("should equally allocate the remainder (1) when weekly volume is NOT divisible by 7", () => {
-        weeklyPosVolume = 8;
-        dailyPosVolume = [
-          { dayOfWeek: 1, volume: 2 },
-          { dayOfWeek: 2, volume: 1 },
-          { dayOfWeek: 3, volume: 1 },
-          { dayOfWeek: 4, volume: 1 },
-          { dayOfWeek: 5, volume: 1 },
-          { dayOfWeek: 6, volume: 1 },
-          { dayOfWeek: 7, volume: 1 }
-        ];
-        expect(disaggregateVolume(weeklyPosVolume)).toMatchObject(
-          dailyPosVolume
-        );
-      });
+describe("FUNCTION: disaggregateVolume | disaggregate consumer unit volume from WEEKLY to DAILY", () => {
+  describe("Disaggregate with EQUAL SPREAD method", () => {
+    it("should return 7 equal daily volume when weekly volume is divisible by 7", () => {
+      weeklyPosVolume = 140;
+      dailyPosVolume = [
+        { dayOfWeek: 1, volume: 20 },
+        { dayOfWeek: 2, volume: 20 },
+        { dayOfWeek: 3, volume: 20 },
+        { dayOfWeek: 4, volume: 20 },
+        { dayOfWeek: 5, volume: 20 },
+        { dayOfWeek: 6, volume: 20 },
+        { dayOfWeek: 7, volume: 20 }
+      ];
 
-      it("should equally allocate the remainder (2) when weekly volume is NOT divisible by 7", () => {
-        weeklyPosVolume = 9;
-        dailyPosVolume = dailyPosVolume = [
-          { dayOfWeek: 1, volume: 2 },
-          { dayOfWeek: 2, volume: 2 },
-          { dayOfWeek: 3, volume: 1 },
-          { dayOfWeek: 4, volume: 1 },
-          { dayOfWeek: 5, volume: 1 },
-          { dayOfWeek: 6, volume: 1 },
-          { dayOfWeek: 7, volume: 1 }
-        ];
-        expect(disaggregateVolume(weeklyPosVolume)).toMatchObject(
-          dailyPosVolume
-        );
-      });
-
-      it("should equally allocate the remainder (4) when weekly volume is NOT divisible by 7", () => {
-        weeklyPosVolume = 11;
-        dailyPosVolume = dailyPosVolume = [
-          { dayOfWeek: 1, volume: 2 },
-          { dayOfWeek: 2, volume: 2 },
-          { dayOfWeek: 3, volume: 2 },
-          { dayOfWeek: 4, volume: 2 },
-          { dayOfWeek: 5, volume: 1 },
-          { dayOfWeek: 6, volume: 1 },
-          { dayOfWeek: 7, volume: 1 }
-        ];
-        expect(disaggregateVolume(weeklyPosVolume)).toMatchObject(
-          dailyPosVolume
-        );
-      });
-
-      it("should equally allocate the remainder (6) when weekly volume is NOT divisible by 7", () => {
-        weeklyPosVolume = 13;
-        dailyPosVolume = dailyPosVolume = [
-          { dayOfWeek: 1, volume: 2 },
-          { dayOfWeek: 2, volume: 2 },
-          { dayOfWeek: 3, volume: 2 },
-          { dayOfWeek: 4, volume: 2 },
-          { dayOfWeek: 5, volume: 2 },
-          { dayOfWeek: 6, volume: 2 },
-          { dayOfWeek: 7, volume: 1 }
-        ];
-        expect(disaggregateVolume(weeklyPosVolume)).toMatchObject(
-          dailyPosVolume
-        );
-      });
+      expect(disaggregateVolume(weeklyPosVolume)).toMatchObject(dailyPosVolume);
     });
 
-    describe("When % uplift on top of baseline volume is given,", () => {
-      describe("calculateTotalVolume function | Formula: Total Volume = Baseline Volume x Uplift %", () => {
-        it("should NOT round the Total Volume when the calculation result is a whole number", () => {
-          baselineVolume = 100;
-          uplift = 1.5;
-          expect(calculateTotalVolume(baselineVolume, uplift)).toBe(150);
-        });
+    it("should equally allocate the remainder (1) when weekly volume is NOT divisible by 7", () => {
+      weeklyPosVolume = 8;
+      dailyPosVolume = [
+        { dayOfWeek: 1, volume: 2 },
+        { dayOfWeek: 2, volume: 1 },
+        { dayOfWeek: 3, volume: 1 },
+        { dayOfWeek: 4, volume: 1 },
+        { dayOfWeek: 5, volume: 1 },
+        { dayOfWeek: 6, volume: 1 },
+        { dayOfWeek: 7, volume: 1 }
+      ];
 
-        it("should round the Total Volume when the calculation result is a float number (round up)", () => {
-          baselineVolume = 100;
-          uplift = 2.005;
-          expect(calculateTotalVolume(baselineVolume, uplift)).toBe(201);
-        });
+      expect(disaggregateVolume(weeklyPosVolume)).toMatchObject(dailyPosVolume);
+    });
 
-        it("should round the Total Volume when the calculation result is a float number (round down)", () => {
-          baselineVolume = 100;
-          uplift = 2.004;
-          expect(calculateTotalVolume(baselineVolume, uplift)).toBe(200);
-        });
-      });
-      it("should return 7 equal daily volume when weekly volume is divisible by 7", () => {
-        baselineVolume = 100;
-        volumeUplift = 1.4;
-        dailyPosVolume = [
-          { dayOfWeek: 1, volume: 20 },
-          { dayOfWeek: 2, volume: 20 },
-          { dayOfWeek: 3, volume: 20 },
-          { dayOfWeek: 4, volume: 20 },
-          { dayOfWeek: 5, volume: 20 },
-          { dayOfWeek: 6, volume: 20 },
-          { dayOfWeek: 7, volume: 20 }
-        ];
-        expect(
-          disaggregateVolume(calculateTotalVolume(baselineVolume, volumeUplift))
-        ).toMatchObject(dailyPosVolume);
-      });
+    it("should equally allocate the remainder (2) when weekly volume is NOT divisible by 7", () => {
+      weeklyPosVolume = 9;
+      dailyPosVolume = dailyPosVolume = [
+        { dayOfWeek: 1, volume: 2 },
+        { dayOfWeek: 2, volume: 2 },
+        { dayOfWeek: 3, volume: 1 },
+        { dayOfWeek: 4, volume: 1 },
+        { dayOfWeek: 5, volume: 1 },
+        { dayOfWeek: 6, volume: 1 },
+        { dayOfWeek: 7, volume: 1 }
+      ];
+
+      expect(disaggregateVolume(weeklyPosVolume)).toMatchObject(dailyPosVolume);
+    });
+
+    it("should equally allocate the remainder (4) when weekly volume is NOT divisible by 7", () => {
+      weeklyPosVolume = 11;
+      dailyPosVolume = dailyPosVolume = [
+        { dayOfWeek: 1, volume: 2 },
+        { dayOfWeek: 2, volume: 2 },
+        { dayOfWeek: 3, volume: 2 },
+        { dayOfWeek: 4, volume: 2 },
+        { dayOfWeek: 5, volume: 1 },
+        { dayOfWeek: 6, volume: 1 },
+        { dayOfWeek: 7, volume: 1 }
+      ];
+
+      expect(disaggregateVolume(weeklyPosVolume)).toMatchObject(dailyPosVolume);
+    });
+
+    it("should equally allocate the remainder (6) when weekly volume is NOT divisible by 7", () => {
+      weeklyPosVolume = 13;
+      dailyPosVolume = dailyPosVolume = [
+        { dayOfWeek: 1, volume: 2 },
+        { dayOfWeek: 2, volume: 2 },
+        { dayOfWeek: 3, volume: 2 },
+        { dayOfWeek: 4, volume: 2 },
+        { dayOfWeek: 5, volume: 2 },
+        { dayOfWeek: 6, volume: 2 },
+        { dayOfWeek: 7, volume: 1 }
+      ];
+
+      expect(disaggregateVolume(weeklyPosVolume)).toMatchObject(dailyPosVolume);
+    });
+
+    it("should return 7 equal daily volume when weekly volume is divisible by 7", () => {
+      baseline = 100;
+      uplift = 1.4;
+      method = "percentage";
+      dailyPosVolume = [
+        { dayOfWeek: 1, volume: 20 },
+        { dayOfWeek: 2, volume: 20 },
+        { dayOfWeek: 3, volume: 20 },
+        { dayOfWeek: 4, volume: 20 },
+        { dayOfWeek: 5, volume: 20 },
+        { dayOfWeek: 6, volume: 20 },
+        { dayOfWeek: 7, volume: 20 }
+      ];
+
+      expect(
+        disaggregateVolume(calculateTotalVolume(baseline, uplift, method))
+      ).toMatchObject(dailyPosVolume);
+    });
+  });
+
+  describe("When incremental sales volume on top of baseline volume is given,", () => {});
+});
+
+describe("FUNCTION: calculateTotalVolume | calculate total volume with BASELINE and volume UPLIFT", () => {
+  describe("Volume UPLIFT as a 'percentage' applied on Baseline Volume", () => {
+    it("should NOT round the Total Volume when the calculation result is a whole number", () => {
+      baseline = 100;
+      uplift = 1.5;
+      method = "percentage";
+
+      expect(calculateTotalVolume(baseline, uplift, method)).toBe(150);
+    });
+
+    it("should round the Total Volume when the calculation result is a float number (round up)", () => {
+      baseline = 100;
+      uplift = 2.005;
+      method = "percentage";
+
+      expect(calculateTotalVolume(baseline, uplift, method)).toBe(201);
+    });
+
+    it("should round the Total Volume when the calculation result is a float number (round down)", () => {
+      baseline = 100;
+      uplift = 2.004;
+      method = "percentage";
+
+      expect(calculateTotalVolume(baseline, uplift, method)).toBe(200);
+    });
+  });
+
+  describe("Volume UPLIFT as 'absolute' incremental volume on top of Baseline Volume", () => {
+    it("should return Total Volume as Baseline Volume + Incremental Sales Volume", () => {
+      baseline = 100;
+      uplift = 110;
+      method = "absolute";
+
+      expect(calculateTotalVolume(baseline, uplift, method)).toBe(210);
+    });
+  });
+
+  describe("Volume UPLIFT METHOD receives invalid value", () => {});
+
+  describe("Invalid function parameters", () => {
+    it("should throw an error when METHOD parameter receives invalid value", () => {
+      baseline = 100;
+      uplift = 110;
+      method = "giberrish";
+
+      expect(() => {
+        calculateTotalVolume(baseline, uplift, method);
+      }).toThrowError();
+    });
+
+    it("should throw an error when METHOD is 'absolute' and UPLIFT receives FLOAT number", () => {
+      baseline = 100;
+      uplift = 110.5;
+      method = "absolute";
+
+      expect(() => {
+        calculateTotalVolume(baseline, uplift, method);
+      }).toThrowError();
+    });
+
+    it("should throw an error when METHOD is 'absolute' and UPLIFT receives NEGATIVE number", () => {
+      baseline = 100;
+      uplift = -30;
+      method = "absolute";
+
+      expect(() => {
+        calculateTotalVolume(baseline, uplift, method);
+      }).toThrowError();
     });
   });
 });
@@ -137,7 +189,7 @@ A Sales AE choose to plan sales volume
 WHEN
 Sales AE complete the sales volume forecast for all 52 weeks in a Fiscal-Year 
 for an SKU using any one or any combinations of below methods and press confirm
- / save:
+/ save:
 
 - forecast weekly sales volume by inputting a total sales volume number,
 - forecast weekly sales volume by inputting a % uplift on top of the SKU's

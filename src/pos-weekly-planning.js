@@ -19,8 +19,20 @@ const disaggregateVolume = totalVolume => {
   });
 };
 
-const calculateTotalVolume = (baselineVolume, uplift) => {
-  return Math.round((totalVolume = baselineVolume * uplift));
+const calculateTotalVolume = (baseline, uplift, method) => {
+  if (method === "absolute") {
+    if (Number.isInteger(uplift) && Math.sign(uplift) !== -1) {
+      return baseline + uplift;
+    } else {
+      throw new Error("Absolute Uplift can only be 0 or positive integer");
+    }
+  } else if (method === "percentage") {
+    return Math.round((totalVolume = baseline * uplift));
+  } else {
+    throw new Error(
+      "Uplift method can only be either 'absolute' or 'percentage'"
+    );
+  }
 };
 
 module.exports = { disaggregateVolume, calculateTotalVolume };
