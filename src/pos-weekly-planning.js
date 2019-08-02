@@ -21,13 +21,30 @@ const disaggregateVolume = totalVolume => {
 
 const calculateTotalVolume = (baseline, uplift, method) => {
   if (method === "absolute") {
-    if (Number.isInteger(uplift) && Math.sign(uplift) !== -1) {
+    if (
+      Number.isInteger(uplift) &&
+      Math.sign(uplift) !== -1 &&
+      Number.isInteger(baseline) &&
+      Math.sign(baseline) !== -1
+    ) {
       return baseline + uplift;
     } else {
-      throw new Error("Absolute Uplift can only be 0 or positive integer");
+      throw new Error(
+        "Baseline and Absolute Uplift can only be 0 or positive integer"
+      );
     }
   } else if (method === "percentage") {
-    return Math.round((totalVolume = baseline * uplift));
+    if (
+      uplift >= 1 &&
+      Number.isInteger(baseline) &&
+      Math.sign(baseline) !== -1
+    ) {
+      return Math.round((totalVolume = baseline * uplift));
+    } else {
+      throw new Error(
+        "Baseline can only be 0 or positive integer and Percentage Uplift can only be 1 or larger"
+      );
+    }
   } else {
     throw new Error(
       "Uplift method can only be either 'absolute' or 'percentage'"

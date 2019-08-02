@@ -144,10 +144,8 @@ describe("FUNCTION: calculateTotalVolume | calculate total volume with BASELINE 
     });
   });
 
-  describe("Volume UPLIFT METHOD receives invalid value", () => {});
-
   describe("Invalid function parameters", () => {
-    it("should throw an error when METHOD parameter receives invalid value", () => {
+    it("should throw an error when METHOD is NOT 'absolute' or 'percentage'", () => {
       baseline = 100;
       uplift = 110;
       method = "giberrish";
@@ -176,6 +174,36 @@ describe("FUNCTION: calculateTotalVolume | calculate total volume with BASELINE 
         calculateTotalVolume(baseline, uplift, method);
       }).toThrowError();
     });
+
+    it("should throw an error when METHOD is 'percentage' and BASELINE receives FLOAT number", () => {
+      baseline = -100.5;
+      uplift = 30;
+      method = "percentage";
+
+      expect(() => {
+        calculateTotalVolume(baseline, uplift, method);
+      }).toThrowError();
+    });
+
+    it("should throw an error when METHOD is 'percentage' and BASELINE receives NEGATIVE number", () => {
+      baseline = -100;
+      uplift = 30;
+      method = "percentage";
+
+      expect(() => {
+        calculateTotalVolume(baseline, uplift, method);
+      }).toThrowError();
+    });
+
+    it("should throw an error when METHOD is 'percentage' and UPLIFT receives number LESS THAN 1", () => {
+      baseline = 100;
+      uplift = 0.9;
+      method = "percentage";
+
+      expect(() => {
+        calculateTotalVolume(baseline, uplift, method);
+      }).toThrowError();
+    });
   });
 });
 
@@ -193,9 +221,9 @@ for an SKU using any one or any combinations of below methods and press confirm
 
 - forecast weekly sales volume by inputting a total sales volume number,
 - forecast weekly sales volume by inputting a % uplift on top of the SKU's
-  weekly baseline sales volume,
+weekly baseline sales volume,
 - forecast weekly sales volume by inputting an incremental sales volume number 
-  on top of baseline sales volume,
+on top of baseline sales volume,
 
 THEN
 The system should persist Sales AE's full 52-week plan and
