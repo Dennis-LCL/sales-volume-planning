@@ -20,36 +20,73 @@ describe("CONSUMER UNIT", () => {
 
   describe("Methods", () => {
     describe("Addition function", () => {
-      it("should accept INTEGER ONLY as parameter and return SUMMARY", () => {
-        const cu = new ConsumerUnit(100);
+      describe("Non-ConsumerUnit as Parameter", () => {
+        it("should accept INTEGER ONLY as parameter and return SUMMARY", () => {
+          const cu = new ConsumerUnit(100);
+          console.log(cu instanceof ConsumerUnit);
 
-        expect(cu.add(0)).toMatchObject(new ConsumerUnit(100));
-        expect(cu.add(100)).toMatchObject(new ConsumerUnit(200));
-        expect(cu.add(-100)).toMatchObject(new ConsumerUnit(0));
+          expect(cu.add(0)).toMatchObject(new ConsumerUnit(100));
+          expect(cu.add(100)).toMatchObject(new ConsumerUnit(200));
+          expect(cu.add(-100)).toMatchObject(new ConsumerUnit(0));
+        });
+
+        it("should reject NON-INTEGER as paramter and throw error", () => {
+          expect(() => cu.add(100.5)).toThrowError(); // Positive Float
+          expect(() => cu.add(-100.5)).toThrowError(); // Negative Float
+          expect(() => cu.add("I'm groot")).toThrowError(); // Not-A-Number
+        });
       });
 
-      it("should reject NON-INTEGER as paramter and throw error", () => {
-        expect(() => cu.add(100.5)).toThrowError(); // Positive Float
-        expect(() => cu.add(-100.5)).toThrowError(); // Negative Float
-        expect(() => cu.add("I'm groot")).toThrowError(); // Not-A-Number
+      describe("ConsumerUnit as Parameter", () => {
+        it("should return SUMMARY if a ConsumerUnit is received as parameter", () => {
+          const cu = new ConsumerUnit(10);
+
+          expect(cu.add(new ConsumerUnit(10))).toMatchObject(
+            new ConsumerUnit(20)
+          );
+          expect(cu.add(new ConsumerUnit(-10))).toMatchObject(
+            new ConsumerUnit(0)
+          );
+          expect(cu.add(new ConsumerUnit(-20))).toMatchObject(
+            new ConsumerUnit(-10)
+          );
+        });
       });
     });
 
     describe("Subtraction function", () => {
-      it("should accept INTEGER ONLY as parameter and return DIFFERENCE", () => {
-        const cu = new ConsumerUnit(100);
+      describe("Non-ConsumerUnit as Parameter", () => {
+        it("should accept INTEGER ONLY as parameter and return DIFFERENCE", () => {
+          const cu = new ConsumerUnit(100);
 
-        expect(cu.subtract(0)).toMatchObject(new ConsumerUnit(100));
-        expect(cu.subtract(100)).toMatchObject(new ConsumerUnit(0));
-        expect(cu.subtract(-50)).toMatchObject(new ConsumerUnit(150));
+          expect(cu.subtract(0)).toMatchObject(new ConsumerUnit(100));
+          expect(cu.subtract(100)).toMatchObject(new ConsumerUnit(0));
+          expect(cu.subtract(-50)).toMatchObject(new ConsumerUnit(150));
+        });
+
+        it("should reject NON-INTEGER as paramter and throw error", () => {
+          const cu = new ConsumerUnit(100);
+
+          expect(() => cu.subtract(100.5)).toThrowError(); // Positive Float
+          expect(() => cu.subtract(-100.5)).toThrowError(); // Negative Float
+          expect(() => cu.subtract("I'm groot")).toThrowError(); // Not-A-Number
+        });
       });
 
-      it("should reject NON-INTEGER as paramter and throw error", () => {
-        const cu = new ConsumerUnit(100);
+      describe("ConsumerUnit as Parameter", () => {
+        it("should return SUMMARY if a ConsumerUnit is received as parameter", () => {
+          const cu = new ConsumerUnit(10);
 
-        expect(() => cu.subtract(100.5)).toThrowError(); // Positive Float
-        expect(() => cu.subtract(-100.5)).toThrowError(); // Negative Float
-        expect(() => cu.subtract("I'm groot")).toThrowError(); // Not-A-Number
+          expect(cu.subtract(new ConsumerUnit(10))).toMatchObject(
+            new ConsumerUnit(0)
+          );
+          expect(cu.subtract(new ConsumerUnit(-10))).toMatchObject(
+            new ConsumerUnit(20)
+          );
+          expect(cu.subtract(new ConsumerUnit(-20))).toMatchObject(
+            new ConsumerUnit(30)
+          );
+        });
       });
     });
 
@@ -132,6 +169,25 @@ describe("CONSUMER UNIT", () => {
           };
 
           expect(cu.divide(3)).toMatchObject(result);
+        });
+      });
+    });
+
+    describe("Disaggregate function", () => {
+      describe("disaggregate(numberOfReceivers)", () => {
+        it.only("should disaggregate ConsumerUnit equally to the numberOfReceivers", () => {
+          const cu = new ConsumerUnit(140);
+          const result = [
+            new ConsumerUnit(20),
+            new ConsumerUnit(20),
+            new ConsumerUnit(20),
+            new ConsumerUnit(20),
+            new ConsumerUnit(20),
+            new ConsumerUnit(20),
+            new ConsumerUnit(20)
+          ];
+
+          expect(cu.disaggregate(7)).toMatchObject(result);
         });
       });
     });

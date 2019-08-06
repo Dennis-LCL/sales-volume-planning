@@ -15,25 +15,33 @@ class ConsumerUnit {
     }
   }
 
-  add(amount) {
-    try {
-      this.isNumber(amount);
-      const addend = new ConsumerUnit(amount);
+  add(addend) {
+    if (addend instanceof ConsumerUnit) {
       return new ConsumerUnit(this.amount + addend.amount);
-    } catch (error) {
-      console.log(error);
-      throw new Error(`Addition failed: ${error.message}`);
+    } else {
+      try {
+        this.isNumber(addend);
+        const addendInConsumerUnit = new ConsumerUnit(addend);
+        return new ConsumerUnit(this.amount + addendInConsumerUnit.amount);
+      } catch (error) {
+        console.log(error);
+        throw new Error(`Addition failed: ${error.message}`);
+      }
     }
   }
 
-  subtract(amount) {
-    try {
-      this.isNumber(amount);
-      const subtrahend = new ConsumerUnit(amount);
+  subtract(subtrahend) {
+    if (subtrahend instanceof ConsumerUnit) {
       return new ConsumerUnit(this.amount - subtrahend.amount);
-    } catch (error) {
-      console.log(error);
-      throw new Error(`Subtraction failed: ${error.message}`);
+    } else {
+      try {
+        this.isNumber(subtrahend);
+        const subtrahendInConsumerUnit = new ConsumerUnit(subtrahend);
+        return new ConsumerUnit(this.amount - subtrahendInConsumerUnit.amount);
+      } catch (error) {
+        console.log(error);
+        throw new Error(`Subtraction failed: ${error.message}`);
+      }
     }
   }
 
@@ -72,6 +80,15 @@ class ConsumerUnit {
       console.log(error);
       throw new Error(`Division failed: ${error.message}`);
     }
+  }
+
+  disaggregate(numberOfReceivers) {
+    const result = [];
+    for (let i = 0; i < numberOfReceivers; i++) {
+      result.push(new ConsumerUnit(this.amount / numberOfReceivers));
+    }
+    console.log(result);
+    return result;
   }
 }
 
