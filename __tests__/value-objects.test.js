@@ -108,7 +108,63 @@ describe("CONSUMER UNIT", () => {
             expect(dividend.disaggregate(divisor)).toMatchObject(result);
           });
         });
-        describe("remainder > 0 ", () => {});
+        describe("remainder > 0 ", () => {
+          it("should return a list of ConsumerUnits with remainder (1) allocated as equally as possible", () => {
+            const dividend = new ConsumerUnit(6);
+            const divisor = 5;
+            const result = [
+              new ConsumerUnit(2),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1)
+            ];
+
+            expect(dividend.disaggregate(divisor)).toMatchObject(result);
+          });
+
+          it("should return a list of ConsumerUnits with remainder (2) allocated as equally as possible", () => {
+            const dividend = new ConsumerUnit(7);
+            const divisor = 5;
+            const result = [
+              new ConsumerUnit(2),
+              new ConsumerUnit(2),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1)
+            ];
+
+            expect(dividend.disaggregate(divisor)).toMatchObject(result);
+          });
+
+          it("should return a list of ConsumerUnits with remainder (3) allocated as equally as possible", () => {
+            const dividend = new ConsumerUnit(8);
+            const divisor = 5;
+            const result = [
+              new ConsumerUnit(2),
+              new ConsumerUnit(2),
+              new ConsumerUnit(2),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1)
+            ];
+
+            expect(dividend.disaggregate(divisor)).toMatchObject(result);
+          });
+
+          it("should return a list of ConsumerUnits with remainder (4) allocated as equally as possible", () => {
+            const dividend = new ConsumerUnit(9);
+            const divisor = 5;
+            const result = [
+              new ConsumerUnit(2),
+              new ConsumerUnit(2),
+              new ConsumerUnit(2),
+              new ConsumerUnit(2),
+              new ConsumerUnit(1)
+            ];
+
+            expect(dividend.disaggregate(divisor)).toMatchObject(result);
+          });
+        });
       });
     });
 

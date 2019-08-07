@@ -25,12 +25,14 @@ class ConsumerUnit {
     if (!this.isPositiveInteger(divisor)) {
       throw new Error("Diviulsor must be a positive integer");
     } else {
-      const result = [];
-      for (let i = 0; i < divisor; i++) {
-        result.push(new ConsumerUnit(this.amount / divisor));
-      }
-      console.log(result);
-      return result;
+      const result = new Array(divisor).fill();
+      const quotient = Math.floor(this.amount / divisor);
+      let remainder = this.amount % divisor;
+
+      return result.map(element => {
+        remainder -= 1;
+        return new ConsumerUnit(remainder >= 0 ? quotient + 1 : quotient);
+      });
     }
   }
 
