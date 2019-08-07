@@ -108,6 +108,7 @@ describe("CONSUMER UNIT", () => {
             expect(dividend.disaggregate(divisor)).toMatchObject(result);
           });
         });
+
         describe("remainder > 0 ", () => {
           it("should return a list of ConsumerUnits with remainder (1) allocated as equally as possible", () => {
             const dividend = new ConsumerUnit(6);
@@ -163,6 +164,34 @@ describe("CONSUMER UNIT", () => {
             ];
 
             expect(dividend.disaggregate(divisor)).toMatchObject(result);
+          });
+        });
+      });
+
+      describe("Weightage-Spread", () => {
+        describe("Parameter Check", () => {
+          it("should accept only ARRAY OF FLOATS between 0 and 1 (inclusive)", () => {
+            const dividend = new ConsumerUnit(100);
+            const zeroAndOne = [0.0, 1.0];
+            const inRange = [0.5, 0.5];
+            const outOfRange = [-0.5, -0.3, 1.8];
+            const notANumber = ["I'm Groot", "I'm Groot", "I'm Groot"];
+
+            expect(() => dividend.disaggregate(zeroAndOne)).not.toThrowError();
+            expect(() => dividend.disaggregate(inRange)).not.toThrowError();
+            expect(() => dividend.disaggregate(outOfRange)).toThrowError();
+            expect(() => dividend.disaggregate(notANumber)).toThrowError();
+          });
+
+          it("should accept only ARRAY OF FLOATS sum up to 1", () => {
+            const dividend = new ConsumerUnit(100);
+            const equalToOne = [0.0, 1.0];
+            const largerThanOne = [0.5, 0.8];
+            const lessThanOne = [0.5, 0.3];
+
+            expect(() => dividend.disaggregate(equalToOne)).not.toThrowError();
+            expect(() => dividend.disaggregate(largerThanOne)).toThrowError();
+            expect(() => dividend.disaggregate(lessThanOne)).toThrowError();
           });
         });
       });

@@ -13,6 +13,35 @@ class ConsumerUnit {
     return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
   }
 
+  isValidWeightageArray(weightageArray) {
+    if (weightageArray instanceof Array) {
+      const invalidWeightageCount = weightageArray.filter(weightage => {
+        return typeof weightage !== "number" || weightage < 0 || weightage > 1;
+      }).length;
+
+      if (invalidWeightageCount === 0) {
+        const weightageSum = weightageArray.reduce((total, weightage) => {
+          return (total += weightage);
+        });
+        return weightageSum === 1 ? true : false;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  checkDivisorType(divisor) {
+    if (this.isPositiveInteger(divisor)) {
+      return "positive integer";
+    } else if (this.isValidWeightageArray(divisor)) {
+      return "weightage array";
+    } else {
+      return "invalid divisor";
+    }
+  }
+
   aggregate(addend) {
     if (!addend instanceof ConsumerUnit) {
       throw new Error("Aggregate method only accept ConsumerUnit as parameter");
@@ -20,19 +49,31 @@ class ConsumerUnit {
       return new ConsumerUnit(this.amount + addend.amount);
     }
   }
+  spreadEqually(divisor) {
+    const result = new Array(divisor).fill();
+    const quotient = Math.floor(this.amount / divisor);
+    let remainder = this.amount % divisor;
+
+    return result.map(element => {
+      remainder -= 1;
+      return new ConsumerUnit(remainder >= 0 ? quotient + 1 : quotient);
+    });
+  }
 
   disaggregate(divisor) {
-    if (!this.isPositiveInteger(divisor)) {
-      throw new Error("Diviulsor must be a positive integer");
-    } else {
-      const result = new Array(divisor).fill();
-      const quotient = Math.floor(this.amount / divisor);
-      let remainder = this.amount % divisor;
+    const divisorType = this.checkDivisorType(divisor);
 
-      return result.map(element => {
-        remainder -= 1;
-        return new ConsumerUnit(remainder >= 0 ? quotient + 1 : quotient);
-      });
+    switch (divisorType) {
+      case "positive integer":
+        return this.spreadEqually(divisor);
+
+      case "weightage array":
+        return "Valid Weightage Array";
+
+      case "invalid divisor":
+        throw new Error(
+          "Invalid divisor: must be a positive integer or an array of floats between 0 and 1 (inclusive)"
+        );
     }
   }
 
@@ -43,96 +84,6 @@ class ConsumerUnit {
       throw new Error("Minuend must be >= Subtrahend");
     } else {
       return new ConsumerUnit(this.amount - subtrahend.amount);
-    }
-  }
-
-  isValidAddendOrSubtrahend(param) {
-    return Number.isInteger(param) || param instanceof ConsumerUnit
-      ? true
-      : new Error("must be an integer or a ConsumerUnit");
-  }
-
-  isValidFactor(param) {
-    return typeof param === "number" ? true : new Error("must be a number");
-  }
-
-  isValidDivisor(param) {
-    return Number.isInteger(param) && Math.sign(param) === 1
-      ? true
-      : new Error("must be a positive integer");
-  }
-
-  isNumber(param) {
-    if (typeof param !== "number") {
-      throw new Error("Parameter can only be a number");
-    }
-  }
-
-  add(addend) {
-    this.isValidAddendOrSubtrahend(addend);
-    if (addend instanceof ConsumerUnit) {
-      return new ConsumerUnit(this.amount + addend.amount);
-    } else {
-      try {
-        this.isNumber(addend);
-        const addendInConsumerUnit = new ConsumerUnit(addend);
-        return new ConsumerUnit(this.amount + addendInConsumerUnit.amount);
-      } catch (error) {
-        console.log(error);
-        throw new Error(`Addition failed: ${error.message}`);
-      }
-    }
-  }
-
-  subtract(subtrahend) {
-    if (subtrahend instanceof ConsumerUnit) {
-      return new ConsumerUnit(this.amount - subtrahend.amount);
-    } else {
-      try {
-        this.isNumber(subtrahend);
-        const subtrahendInConsumerUnit = new ConsumerUnit(subtrahend);
-        return new ConsumerUnit(this.amount - subtrahendInConsumerUnit.amount);
-      } catch (error) {
-        console.log(error);
-        throw new Error(`Subtraction failed: ${error.message}`);
-      }
-    }
-  }
-
-  multiply(factor) {
-    try {
-      this.isNumber(factor);
-      return factor === 0
-        ? new ConsumerUnit(0)
-        : new ConsumerUnit(
-            Math.sign(this.amount * factor) *
-              Math.round(Math.abs(this.amount * factor))
-          );
-    } catch (error) {
-      console.log(error);
-      throw new Error(`Multiplication failed: ${error.message}`);
-    }
-  }
-
-  divide(divisor) {
-    try {
-      this.isNumber(divisor);
-      if (Math.sign(divisor) === 1 && Number.isInteger(divisor)) {
-        const quotient =
-          Math.sign(this.amount) * Math.floor(Math.abs(this.amount) / divisor);
-        const remainder = this.amount % divisor;
-        return {
-          quotient: new ConsumerUnit(quotient),
-          remainder: new ConsumerUnit(remainder)
-        };
-      } else {
-        throw new Error(
-          "Divisor cannot be zero (0) and must be a positive integer"
-        );
-      }
-    } catch (error) {
-      console.log(error);
-      throw new Error(`Division failed: ${error.message}`);
     }
   }
 }
