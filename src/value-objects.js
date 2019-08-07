@@ -1,11 +1,46 @@
 class ConsumerUnit {
   constructor(amount) {
-    if (Number.isInteger(amount)) {
-      this.amount = amount;
-    } else if (amount === undefined) {
+    if (amount === undefined) {
       this.amount = 0;
+    } else if (this.isPositiveInteger(amount) || amount === 0) {
+      this.amount = amount;
     } else {
-      throw new Error("Consumer Unit must be an integer");
+      throw new Error("Consumer Unit must be an integer >= 0");
+    }
+  }
+
+  isPositiveInteger(param) {
+    return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
+  }
+
+  aggregate(addend) {
+    if (!addend instanceof ConsumerUnit) {
+      throw new Error("Aggregate method only accept ConsumerUnit as parameter");
+    } else {
+      return new ConsumerUnit(this.amount + addend.amount);
+    }
+  }
+
+  disaggregate(divisor) {
+    if (!this.isPositiveInteger(divisor)) {
+      throw new Error("Diviulsor must be a positive integer");
+    } else {
+      const result = [];
+      for (let i = 0; i < divisor; i++) {
+        result.push(new ConsumerUnit(this.amount / divisor));
+      }
+      console.log(result);
+      return result;
+    }
+  }
+
+  deduct(subtrahend) {
+    if (!subtrahend instanceof ConsumerUnit) {
+      throw new Error("Deduct method only accept ConsumerUnit as parameter");
+    } else if (this.amount < subtrahend.amount) {
+      throw new Error("Minuend must be >= Subtrahend");
+    } else {
+      return new ConsumerUnit(this.amount - subtrahend.amount);
     }
   }
 
@@ -32,6 +67,7 @@ class ConsumerUnit {
   }
 
   add(addend) {
+    this.isValidAddendOrSubtrahend(addend);
     if (addend instanceof ConsumerUnit) {
       return new ConsumerUnit(this.amount + addend.amount);
     } else {
@@ -96,22 +132,6 @@ class ConsumerUnit {
       console.log(error);
       throw new Error(`Division failed: ${error.message}`);
     }
-  }
-
-  disaggregate(numberOfReceivers) {
-    const result = [];
-    for (let i = 0; i < numberOfReceivers; i++) {
-      result.push(new ConsumerUnit(this.amount / numberOfReceivers));
-    }
-
-    return result.map(dayOfWeek => {
-      dayOfWeek.volume = remainder > 0 ? quotient + 1 : quotient;
-      remainder -= 1;
-      return dayOfWeek;
-    });
-
-    console.log(result);
-    return result;
   }
 }
 

@@ -2,15 +2,15 @@ const ConsumerUnit = require("../src/value-objects");
 
 describe("CONSUMER UNIT", () => {
   describe("Constructor", () => {
-    it("should accept INTEGER ONLY as parameter", () => {
+    it("should accept ZERO & POSITIVE INTEGER ONLY as parameter", () => {
       expect(() => new ConsumerUnit(0)).not.toThrowError();
       expect(() => new ConsumerUnit(100)).not.toThrowError();
-      expect(() => new ConsumerUnit(-100)).not.toThrowError();
     });
 
-    it("should reject NON-INTEGER as parameter and throw error", () => {
+    it("should reject FLOAT & NEGATIVE INTEGER as parameter and throw error", () => {
       expect(() => new ConsumerUnit(100.5)).toThrowError();
       expect(() => new ConsumerUnit(-100.5)).toThrowError();
+      expect(() => new ConsumerUnit(-100)).toThrowError();
     });
 
     it("should create a ConsumerUnit object with amount 0 if no parameter received", () => {
@@ -19,168 +19,85 @@ describe("CONSUMER UNIT", () => {
   });
 
   describe("Methods", () => {
-    describe("Addition function", () => {
-      describe("Non-ConsumerUnit as Parameter", () => {
-        it("should accept INTEGER ONLY as parameter and return SUMMARY", () => {
-          const cu = new ConsumerUnit(100);
-          console.log(cu instanceof ConsumerUnit);
+    describe("aggregate(ConsumerUnit)", () => {
+      it("should only accept ConsumerUnit as parameter and return SUMMARY", () => {
+        const cu = new ConsumerUnit(100);
+        const addend = new ConsumerUnit(200);
+        const summary = new ConsumerUnit(300);
 
-          expect(cu.add(0)).toMatchObject(new ConsumerUnit(100));
-          expect(cu.add(100)).toMatchObject(new ConsumerUnit(200));
-          expect(cu.add(-100)).toMatchObject(new ConsumerUnit(0));
-        });
-
-        it("should reject NON-INTEGER as paramter and throw error", () => {
-          expect(() => cu.add(100.5)).toThrowError(); // Positive Float
-          expect(() => cu.add(-100.5)).toThrowError(); // Negative Float
-          expect(() => cu.add("I'm groot")).toThrowError(); // Not-A-Number
-        });
+        expect(cu.aggregate(addend)).toMatchObject(summary);
       });
 
-      describe("ConsumerUnit as Parameter", () => {
-        it("should return SUMMARY if a ConsumerUnit is received as parameter", () => {
-          const cu = new ConsumerUnit(10);
+      it("should reject Non-ConsumerUnit as parameter and throw error", () => {
+        const cu = new ConsumerUnit(100);
 
-          expect(cu.add(new ConsumerUnit(10))).toMatchObject(
-            new ConsumerUnit(20)
-          );
-          expect(cu.add(new ConsumerUnit(-10))).toMatchObject(
-            new ConsumerUnit(0)
-          );
-          expect(cu.add(new ConsumerUnit(-20))).toMatchObject(
-            new ConsumerUnit(-10)
-          );
-        });
+        expect(() => cu.aggregate(10)).toThrowError(); // Positive Integer
+        expect(() => cu.aggregate(-10)).toThrowError(); // Negative Integer
+        expect(() => cu.aggregate(10.5)).toThrowError(); // Positive Float
+        expect(() => cu.aggregate(-10.5)).toThrowError(); // Negative Float
+        expect(() => cu.aggregate(0)).toThrowError(); // Zero (0)
+        expect(() => cu.aggregate("I'm Groot")).toThrowError(); // String
+        expect(() => cu.aggregate(true)).toThrowError(); // Boolean
       });
     });
 
-    describe("Subtraction function", () => {
-      describe("Non-ConsumerUnit as Parameter", () => {
-        it("should accept INTEGER ONLY as parameter and return DIFFERENCE", () => {
-          const cu = new ConsumerUnit(100);
+    describe("deduct(ConsumerUnit)", () => {
+      it("should only accept ConsumerUnit as parameter and return DIFFERENCE", () => {
+        const minuend = new ConsumerUnit(100);
+        const subtrahend = new ConsumerUnit(70);
+        const difference = new ConsumerUnit(30);
 
-          expect(cu.subtract(0)).toMatchObject(new ConsumerUnit(100));
-          expect(cu.subtract(100)).toMatchObject(new ConsumerUnit(0));
-          expect(cu.subtract(-50)).toMatchObject(new ConsumerUnit(150));
-        });
-
-        it("should reject NON-INTEGER as paramter and throw error", () => {
-          const cu = new ConsumerUnit(100);
-
-          expect(() => cu.subtract(100.5)).toThrowError(); // Positive Float
-          expect(() => cu.subtract(-100.5)).toThrowError(); // Negative Float
-          expect(() => cu.subtract("I'm groot")).toThrowError(); // Not-A-Number
-        });
+        expect(minuend.deduct(subtrahend)).toMatchObject(difference);
       });
 
-      describe("ConsumerUnit as Parameter", () => {
-        it("should return SUMMARY if a ConsumerUnit is received as parameter", () => {
-          const cu = new ConsumerUnit(10);
+      it("should throw error if the Minuend is smaller than the Subtrahend", () => {
+        const minuend = new ConsumerUnit(100);
+        const subtrahend = new ConsumerUnit(70);
+        const difference = new ConsumerUnit(30);
 
-          expect(cu.subtract(new ConsumerUnit(10))).toMatchObject(
-            new ConsumerUnit(0)
-          );
-          expect(cu.subtract(new ConsumerUnit(-10))).toMatchObject(
-            new ConsumerUnit(20)
-          );
-          expect(cu.subtract(new ConsumerUnit(-20))).toMatchObject(
-            new ConsumerUnit(30)
-          );
-        });
+        expect(minuend.deduct(subtrahend)).toMatchObject(difference);
+      });
+
+      it("should reject Non-ConsumerUnit as parameter and throw error", () => {
+        const minuend = new ConsumerUnit(100);
+
+        expect(() => minuend.deduct(10)).toThrowError(); // Positive Integer
+        expect(() => minuend.deduct(-10)).toThrowError(); // Negative Integer
+        expect(() => minuend.deduct(10.5)).toThrowError(); // Positive Float
+        expect(() => minuend.deduct(-10.5)).toThrowError(); // Negative Float
+        expect(() => minuend.deduct(0)).toThrowError(); // Zero (0)
+        expect(() => minuend.deduct("I'm Groot")).toThrowError(); // String
+        expect(() => minuend.deduct(true)).toThrowError(); // Boolean
       });
     });
 
-    describe("Multiply function", () => {
-      describe("Positive Consumer Unit", () => {
-        const cu = new ConsumerUnit(10);
+    describe("disaggregate(divisor)", () => {
+      describe("Equal-Spread", () => {
+        describe("Parameter Check", () => {
+          it("should accept only POSITIVE INTEGER as parameter", () => {
+            const dividend = new ConsumerUnit(100);
+            const divisor = 5;
 
-        it("should accept NUMBER as parameter and return PRODUCT", () => {
-          expect(cu.multiply(1)).toMatchObject(new ConsumerUnit(10)); // Positive Integer
-          expect(cu.multiply(1.5)).toMatchObject(new ConsumerUnit(15)); // Positive Float
-          expect(cu.multiply(-1)).toMatchObject(new ConsumerUnit(-10)); // Negative Integer
-          expect(cu.multiply(-0.1)).toMatchObject(new ConsumerUnit(-1)); // Negative Float
-          expect(cu.multiply(0)).toMatchObject(new ConsumerUnit(0)); // Zero (0)
+            expect(() => dividend.disaggregate(divisor)).not.toThrowError();
+          });
+
+          it("should reject Non-POSITIVE INTEGER as parameter and throw error", () => {
+            const dividend = new ConsumerUnit(100);
+
+            expect(() => dividend.disaggregate(-10)).toThrowError(); // Negative Integer
+            expect(() => dividend.disaggregate(10.5)).toThrowError(); // Positive Float
+            expect(() => dividend.disaggregate(-10.5)).toThrowError(); // Negative Float
+            expect(() => dividend.disaggregate(0)).toThrowError(); // Zero (0)
+            expect(() => dividend.disaggregate("I'm Groot")).toThrowError(); // String
+            expect(() => dividend.disaggregate(true)).toThrowError(); // Boolean
+          });
         });
 
-        it("should return ROUNDED PRODUCT", () => {
-          expect(cu.multiply(1.24)).toMatchObject(new ConsumerUnit(12));
-          expect(cu.multiply(1.25)).toMatchObject(new ConsumerUnit(13));
-          expect(cu.multiply(-1.34)).toMatchObject(new ConsumerUnit(-13));
-          expect(cu.multiply(-1.35)).toMatchObject(new ConsumerUnit(-14));
-        });
-
-        it("should reject NON-NUMBER as parameter and throw error", () => {
-          expect(() => cu.multiply("I'm groot")).toThrowError();
-        });
-      });
-
-      describe("Negative Consumer Unit", () => {
-        const cu = new ConsumerUnit(-10);
-
-        it("should accept NUMBER as parameter and return PRODUCT", () => {
-          expect(cu.multiply(1)).toMatchObject(new ConsumerUnit(-10)); // Positive Integer
-          expect(cu.multiply(1.5)).toMatchObject(new ConsumerUnit(-15)); // Positive Float
-          expect(cu.multiply(-1)).toMatchObject(new ConsumerUnit(10)); // Negative Integer
-          expect(cu.multiply(-0.1)).toMatchObject(new ConsumerUnit(1)); // Negative Float
-          expect(cu.multiply(0)).toMatchObject(new ConsumerUnit(0)); // Zero (0)
-        });
-
-        it("should return ROUNDED PRODUCT", () => {
-          expect(cu.multiply(1.24)).toMatchObject(new ConsumerUnit(-12));
-          expect(cu.multiply(1.25)).toMatchObject(new ConsumerUnit(-13));
-          expect(cu.multiply(-1.34)).toMatchObject(new ConsumerUnit(13));
-          expect(cu.multiply(-1.35)).toMatchObject(new ConsumerUnit(14));
-        });
-      });
-    });
-
-    describe("Divide function", () => {
-      describe("Positive Consumer Unit", () => {
-        const cu = new ConsumerUnit(10);
-
-        it("should accept POSITIVE INTEGER ONLY as parameter and return QUOTIENT and REMAINDER", () => {
-          const result = {
-            quotient: new ConsumerUnit(3),
-            remainder: new ConsumerUnit(1)
-          };
-
-          expect(cu.divide(3)).toMatchObject(result);
-        });
-
-        it("should reject ZERO and NEGATIVE INTEGER as parameter and throw error", () => {
-          expect(() => cu.divide(-3)).toThrowError(); // Negative Integer
-          expect(() => cu.divide(0)).toThrowError(); // Zero (0)
-        });
-
-        it("should reject FLOAT & NON-NUMBER as parameter and throw error", () => {
-          expect(() => cu.divide(3.5)).toThrowError(); // Positive Float
-          expect(() => cu.divide(-3.5)).toThrowError(); // Negative Float
-          expect(() => cu.divide("I'm groot")).toThrowError(); // Not-A-Number
-        });
-      });
-
-      describe("Negative Consumer Unit", () => {
-        cu = new ConsumerUnit(-10);
-
-        it("should accept POSITIVE INTEGER ONLY as parameter and return QUOTIENT and REMAINDER", () => {
-          const result = {
-            quotient: new ConsumerUnit(-3),
-            remainder: new ConsumerUnit(-1)
-          };
-
-          expect(cu.divide(3)).toMatchObject(result);
-        });
-      });
-    });
-
-    xdescribe("Disaggregate function", () => {
-      describe("disaggregate(numberOfReceivers)", () => {
-        describe("Remainder = 0", () => {
-          it("should disaggregate ConsumerUnit equally to receivers when remainder = 0", () => {
-            const cu = new ConsumerUnit(140);
+        describe("remainder === 0", () => {
+          it("should return a list of ConsumerUnits of equal amout", () => {
+            const dividend = new ConsumerUnit(100);
+            const divisor = 5;
             const result = [
-              new ConsumerUnit(20),
-              new ConsumerUnit(20),
               new ConsumerUnit(20),
               new ConsumerUnit(20),
               new ConsumerUnit(20),
@@ -188,27 +105,13 @@ describe("CONSUMER UNIT", () => {
               new ConsumerUnit(20)
             ];
 
-            expect(cu.disaggregate(7)).toMatchObject(result);
+            expect(dividend.disaggregate(divisor)).toMatchObject(result);
           });
         });
-
-        describe("Remainder != 0", () => {
-          it("should should allocate the remainder (1) equally to receivers", () => {
-            const cu = new ConsumerUnit(8);
-            const result = [
-              new ConsumerUnit(2),
-              new ConsumerUnit(1),
-              new ConsumerUnit(1),
-              new ConsumerUnit(1),
-              new ConsumerUnit(1),
-              new ConsumerUnit(1),
-              new ConsumerUnit(1)
-            ];
-
-            expect(cu.disaggregate(7)).toMatchObject(result);
-          });
-        });
+        describe("remainder > 0 ", () => {});
       });
     });
+
+    describe("Uplift function", () => {});
   });
 });
