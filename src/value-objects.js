@@ -9,6 +9,22 @@ class ConsumerUnit {
     }
   }
 
+  isValidAddendOrSubtrahend(param) {
+    return Number.isInteger(param) || param instanceof ConsumerUnit
+      ? true
+      : new Error("must be an integer or a ConsumerUnit");
+  }
+
+  isValidFactor(param) {
+    return typeof param === "number" ? true : new Error("must be a number");
+  }
+
+  isValidDivisor(param) {
+    return Number.isInteger(param) && Math.sign(param) === 1
+      ? true
+      : new Error("must be a positive integer");
+  }
+
   isNumber(param) {
     if (typeof param !== "number") {
       throw new Error("Parameter can only be a number");
@@ -87,6 +103,13 @@ class ConsumerUnit {
     for (let i = 0; i < numberOfReceivers; i++) {
       result.push(new ConsumerUnit(this.amount / numberOfReceivers));
     }
+
+    return result.map(dayOfWeek => {
+      dayOfWeek.volume = remainder > 0 ? quotient + 1 : quotient;
+      remainder -= 1;
+      return dayOfWeek;
+    });
+
     console.log(result);
     return result;
   }

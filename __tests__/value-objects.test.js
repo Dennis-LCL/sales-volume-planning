@@ -173,21 +173,40 @@ describe("CONSUMER UNIT", () => {
       });
     });
 
-    describe("Disaggregate function", () => {
+    xdescribe("Disaggregate function", () => {
       describe("disaggregate(numberOfReceivers)", () => {
-        it.only("should disaggregate ConsumerUnit equally to the numberOfReceivers", () => {
-          const cu = new ConsumerUnit(140);
-          const result = [
-            new ConsumerUnit(20),
-            new ConsumerUnit(20),
-            new ConsumerUnit(20),
-            new ConsumerUnit(20),
-            new ConsumerUnit(20),
-            new ConsumerUnit(20),
-            new ConsumerUnit(20)
-          ];
+        describe("Remainder = 0", () => {
+          it("should disaggregate ConsumerUnit equally to receivers when remainder = 0", () => {
+            const cu = new ConsumerUnit(140);
+            const result = [
+              new ConsumerUnit(20),
+              new ConsumerUnit(20),
+              new ConsumerUnit(20),
+              new ConsumerUnit(20),
+              new ConsumerUnit(20),
+              new ConsumerUnit(20),
+              new ConsumerUnit(20)
+            ];
 
-          expect(cu.disaggregate(7)).toMatchObject(result);
+            expect(cu.disaggregate(7)).toMatchObject(result);
+          });
+        });
+
+        describe("Remainder != 0", () => {
+          it("should should allocate the remainder (1) equally to receivers", () => {
+            const cu = new ConsumerUnit(8);
+            const result = [
+              new ConsumerUnit(2),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1),
+              new ConsumerUnit(1)
+            ];
+
+            expect(cu.disaggregate(7)).toMatchObject(result);
+          });
         });
       });
     });
