@@ -194,6 +194,20 @@ describe("CONSUMER UNIT", () => {
             expect(() => dividend.disaggregate(lessThanOne)).toThrowError();
           });
         });
+
+        describe("PRODUCT is a POSITIVE INTEGER or ZERO after applying weightage", () => {
+          it.only("should return a list of ConsumerUnits by applying weightage x amount", () => {
+            const dividend = new ConsumerUnit(100);
+            const divisor = [0.5, 0.3, 0.2];
+            const result = [
+              new ConsumerUnit(50),
+              new ConsumerUnit(30),
+              new ConsumerUnit(20)
+            ];
+
+            expect(dividend.disaggregate(divisor)).toMatchObject(result);
+          });
+        });
       });
     });
 

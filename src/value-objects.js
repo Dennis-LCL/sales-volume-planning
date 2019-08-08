@@ -2,37 +2,18 @@ class ConsumerUnit {
   constructor(amount) {
     if (amount === undefined) {
       this.amount = 0;
-    } else if (this.isPositiveInteger(amount) || amount === 0) {
+    } else if (this._isPositiveInteger(amount) || amount === 0) {
       this.amount = amount;
     } else {
       throw new Error("Consumer Unit must be an integer >= 0");
     }
   }
 
-  isPositiveInteger(param) {
+  _isPositiveInteger(param) {
     return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
   }
 
-  // isValidWeightageArray(weightageArray) {
-  //   if (weightageArray instanceof Array) {
-  //     const invalidWeightageCount = weightageArray.filter(weightage => {
-  //       return typeof weightage !== "number" || weightage < 0 || weightage > 1;
-  //     }).length;
-
-  //     if (invalidWeightageCount === 0) {
-  //       const weightageSum = weightageArray.reduce((total, weightage) => {
-  //         return (total += weightage);
-  //       });
-  //       return weightageSum === 1 ? true : false;
-  //     } else {
-  //       return false;
-  //     }
-  //   } else {
-  //     return false;
-  //   }
-  // }
-
-  isValidWeightageArray(array) {
+  _isValidWeightageArray(array) {
     const verdict =
       array.filter(weightage => typeof weightage !== "number").length === 0 &&
       array.filter(weightage => weightage < 0 || weightage > 1).length === 0 &&
@@ -43,25 +24,17 @@ class ConsumerUnit {
     return verdict;
   }
 
-  checkDivisorType(divisor) {
-    if (this.isPositiveInteger(divisor)) {
+  _checkDivisorType(divisor) {
+    if (this._isPositiveInteger(divisor)) {
       return "positive integer";
-    } else if (this.isValidWeightageArray(divisor)) {
+    } else if (this._isValidWeightageArray(divisor)) {
       return "weightage array";
     } else {
       return "invalid divisor";
     }
   }
 
-  aggregate(addend) {
-    if (!addend instanceof ConsumerUnit) {
-      throw new Error("Aggregate method only accept ConsumerUnit as parameter");
-    } else {
-      return new ConsumerUnit(this.amount + addend.amount);
-    }
-  }
-
-  spreadEqually(divisor) {
+  _spreadEqually(divisor) {
     const result = new Array(divisor).fill();
     const quotient = Math.floor(this.amount / divisor);
     let remainder = this.amount % divisor;
@@ -72,15 +45,27 @@ class ConsumerUnit {
     });
   }
 
+  _spreadByWeightage(divisor) {
+    return divisor.map(weightage => new ConsumerUnit(this.amount * weightage));
+  }
+
+  aggregate(addend) {
+    if (!addend instanceof ConsumerUnit) {
+      throw new Error("Aggregate method only accept ConsumerUnit as parameter");
+    } else {
+      return new ConsumerUnit(this.amount + addend.amount);
+    }
+  }
+
   disaggregate(divisor) {
-    const divisorType = this.checkDivisorType(divisor);
+    const divisorType = this._checkDivisorType(divisor);
 
     switch (divisorType) {
       case "positive integer":
-        return this.spreadEqually(divisor);
+        return this._spreadEqually(divisor);
 
       case "weightage array":
-        return "Valid Weightage Array";
+        return this._spreadByWeightage(divisor);
 
       case "invalid divisor":
         throw new Error(
