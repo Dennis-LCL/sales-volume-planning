@@ -13,23 +13,34 @@ class ConsumerUnit {
     return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
   }
 
-  isValidWeightageArray(weightageArray) {
-    if (weightageArray instanceof Array) {
-      const invalidWeightageCount = weightageArray.filter(weightage => {
-        return typeof weightage !== "number" || weightage < 0 || weightage > 1;
-      }).length;
+  // isValidWeightageArray(weightageArray) {
+  //   if (weightageArray instanceof Array) {
+  //     const invalidWeightageCount = weightageArray.filter(weightage => {
+  //       return typeof weightage !== "number" || weightage < 0 || weightage > 1;
+  //     }).length;
 
-      if (invalidWeightageCount === 0) {
-        const weightageSum = weightageArray.reduce((total, weightage) => {
-          return (total += weightage);
-        });
-        return weightageSum === 1 ? true : false;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
+  //     if (invalidWeightageCount === 0) {
+  //       const weightageSum = weightageArray.reduce((total, weightage) => {
+  //         return (total += weightage);
+  //       });
+  //       return weightageSum === 1 ? true : false;
+  //     } else {
+  //       return false;
+  //     }
+  //   } else {
+  //     return false;
+  //   }
+  // }
+
+  isValidWeightageArray(array) {
+    const verdict =
+      array.filter(weightage => typeof weightage !== "number").length === 0 &&
+      array.filter(weightage => weightage < 0 || weightage > 1).length === 0 &&
+      array.reduce((total, weightage) => (total += weightage)) === 1
+        ? true
+        : false;
+
+    return verdict;
   }
 
   checkDivisorType(divisor) {
@@ -49,6 +60,7 @@ class ConsumerUnit {
       return new ConsumerUnit(this.amount + addend.amount);
     }
   }
+
   spreadEqually(divisor) {
     const result = new Array(divisor).fill();
     const quotient = Math.floor(this.amount / divisor);
