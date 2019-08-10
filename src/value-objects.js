@@ -57,10 +57,12 @@ class ConsumerUnit {
     const difference = sumOfResult - this.amount;
 
     if (difference > 0) {
+      // If sumOfResult is too much, deduct from the end of array
       for (let i = 1; i <= difference; i++) {
         result[result.length - i].amount -= 1;
       }
     } else if (difference < 0) {
+      // If sumOfResult is not enough, add from the beginning of array
       for (let i = 0; i < Math.abs(difference); i++) {
         result[i].amount += 1;
       }
