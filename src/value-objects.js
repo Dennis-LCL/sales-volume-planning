@@ -46,7 +46,22 @@ class ConsumerUnit {
   }
 
   _spreadByWeightage(divisor) {
-    return divisor.map(weightage => new ConsumerUnit(this.amount * weightage));
+    const result = divisor.map(
+      weightage => new ConsumerUnit(Math.round(this.amount * weightage))
+    );
+    console.log(result);
+
+    let sum = 0;
+
+    for (let i = 0; i < result.length; i++) {
+      sum += result[i].amount;
+    }
+
+    const diff = this.amount - sum;
+    console.log("Amount - Rounded Sum = ", diff);
+    result[result.length - 1].amount += diff;
+
+    return result;
   }
 
   aggregate(addend) {

@@ -196,13 +196,52 @@ describe("CONSUMER UNIT", () => {
         });
 
         describe("PRODUCT is a POSITIVE INTEGER or ZERO after applying weightage", () => {
-          it.only("should return a list of ConsumerUnits by applying weightage x amount", () => {
-            const dividend = new ConsumerUnit(100);
+          it("should return a list of ConsumerUnits by applying weightage x amount", () => {
+            const dividend = new ConsumerUnit(10);
             const divisor = [0.5, 0.3, 0.2];
             const result = [
-              new ConsumerUnit(50),
-              new ConsumerUnit(30),
-              new ConsumerUnit(20)
+              new ConsumerUnit(5),
+              new ConsumerUnit(3),
+              new ConsumerUnit(2)
+            ];
+
+            expect(dividend.disaggregate(divisor)).toMatchObject(result);
+          });
+        });
+
+        describe("PRODUCT is a POSITIVE FLOAT after applying weightage", () => {
+          it.only("should return a list of ConsumerUnits by rounding each element", () => {
+            const dividend = new ConsumerUnit(10);
+            const divisor = [0.55, 0.24, 0.21];
+            const result = [
+              new ConsumerUnit(6),
+              new ConsumerUnit(2),
+              new ConsumerUnit(2)
+            ];
+
+            expect(dividend.disaggregate(divisor)).toMatchObject(result);
+          });
+
+          it.only("should return a list of ConsumerUnits sum up to dividend: Case 1", () => {
+            const dividend = new ConsumerUnit(10);
+            const divisor = [0.55, 0.25, 0.2];
+            const result = [
+              new ConsumerUnit(6),
+              new ConsumerUnit(3),
+              new ConsumerUnit(1)
+            ];
+
+            expect(dividend.disaggregate(divisor)).toMatchObject(result);
+          });
+
+          it.only("should return a list of ConsumerUnits sum up to dividend: Case 2", () => {
+            const dividend = new ConsumerUnit(10);
+            const divisor = [0.25, 0.25, 0.25, 0.25];
+            const result = [
+              new ConsumerUnit(3),
+              new ConsumerUnit(3),
+              new ConsumerUnit(2),
+              new ConsumerUnit(2)
             ];
 
             expect(dividend.disaggregate(divisor)).toMatchObject(result);
