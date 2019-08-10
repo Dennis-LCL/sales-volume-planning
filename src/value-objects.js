@@ -49,17 +49,22 @@ class ConsumerUnit {
     const result = divisor.map(
       weightage => new ConsumerUnit(Math.round(this.amount * weightage))
     );
-    console.log(result);
 
-    let sum = 0;
+    const sumOfResult = result
+      .map(element => element.amount)
+      .reduce((total, amount) => (total += amount));
 
-    for (let i = 0; i < result.length; i++) {
-      sum += result[i].amount;
+    const difference = sumOfResult - this.amount;
+
+    if (difference > 0) {
+      for (let i = 1; i <= difference; i++) {
+        result[result.length - i].amount -= 1;
+      }
+    } else if (difference < 0) {
+      for (let i = 0; i < Math.abs(difference); i++) {
+        result[i].amount += 1;
+      }
     }
-
-    const diff = this.amount - sum;
-    console.log("Amount - Rounded Sum = ", diff);
-    result[result.length - 1].amount += diff;
 
     return result;
   }
