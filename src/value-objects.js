@@ -73,7 +73,9 @@ class ConsumerUnit {
 
   aggregate(addend) {
     if (!addend instanceof ConsumerUnit) {
-      throw new Error("Aggregate method only accept ConsumerUnit as parameter");
+      throw new Error(
+        "Aggregate method only accepts ConsumerUnit as parameter"
+      );
     } else {
       return new ConsumerUnit(this.amount + addend.amount);
     }
@@ -96,13 +98,31 @@ class ConsumerUnit {
     }
   }
 
-  deduct(subtrahend) {
-    if (!subtrahend instanceof ConsumerUnit) {
-      throw new Error("Deduct method only accept ConsumerUnit as parameter");
-    } else if (this.amount < subtrahend.amount) {
-      throw new Error("Minuend must be >= Subtrahend");
+  uplift(uplift) {
+    if (uplift instanceof ConsumerUnit) {
+      return this.aggregate(uplift);
+    } else if (typeof uplift === "number" && uplift > 1) {
+      return new ConsumerUnit(this.amount * uplift);
     } else {
-      return new ConsumerUnit(this.amount - subtrahend.amount);
+      throw new Error(
+        "Uplift method only accepts ConsumerUnit or a number larger than 1 as parameter"
+      );
+    }
+  }
+
+  deduct(deduct) {
+    if (deduct instanceof ConsumerUnit) {
+      if (this.amount > deduct.amount) {
+        return this.aggregate(-deduct.amount);
+      } else {
+        throw new Error("Minuend must be >= Subtrahend");
+      }
+    } else if (typeof deduct === "number" && deduct > 0 && deduct < 1) {
+      return new ConsumerUnit(this.amount * deduct);
+    } else {
+      throw new Error(
+        "deduct method only accepts ConsumerUnit or a number between 0 and 1 (exclusive) as parameter"
+      );
     }
   }
 }

@@ -41,36 +41,6 @@ describe("CONSUMER UNIT", () => {
       });
     });
 
-    describe("deduct(ConsumerUnit)", () => {
-      it("should only accept ConsumerUnit as parameter and return DIFFERENCE", () => {
-        const minuend = new ConsumerUnit(100);
-        const subtrahend = new ConsumerUnit(70);
-        const difference = new ConsumerUnit(30);
-
-        expect(minuend.deduct(subtrahend)).toMatchObject(difference);
-      });
-
-      it("should throw error if the Minuend is smaller than the Subtrahend", () => {
-        const minuend = new ConsumerUnit(100);
-        const subtrahend = new ConsumerUnit(70);
-        const difference = new ConsumerUnit(30);
-
-        expect(minuend.deduct(subtrahend)).toMatchObject(difference);
-      });
-
-      it("should reject Non-ConsumerUnit as parameter and throw error", () => {
-        const minuend = new ConsumerUnit(100);
-
-        expect(() => minuend.deduct(10)).toThrowError(); // Positive Integer
-        expect(() => minuend.deduct(-10)).toThrowError(); // Negative Integer
-        expect(() => minuend.deduct(10.5)).toThrowError(); // Positive Float
-        expect(() => minuend.deduct(-10.5)).toThrowError(); // Negative Float
-        expect(() => minuend.deduct(0)).toThrowError(); // Zero (0)
-        expect(() => minuend.deduct("I'm Groot")).toThrowError(); // String
-        expect(() => minuend.deduct(true)).toThrowError(); // Boolean
-      });
-    });
-
     describe("disaggregate(divisor)", () => {
       describe("Equal-Spread", () => {
         describe("Parameter Check", () => {
@@ -262,6 +232,85 @@ describe("CONSUMER UNIT", () => {
       });
     });
 
-    describe("Uplift function", () => {});
+    describe("uplift(uplift)", () => {
+      describe("uplift(ConsumerUnit)", () => {
+        it("should receive a ConsumerUnit and return the SUMMARY", () => {
+          const cu = new ConsumerUnit(100);
+          const uplift = new ConsumerUnit(50);
+          const sum = new ConsumerUnit(150);
+
+          expect(cu.uplift(uplift)).toMatchObject(sum);
+        });
+      });
+
+      describe("uplift(number > 1)", () => {
+        it("should receive a number larger than 1 and return the PRODUCT", () => {
+          const cu = new ConsumerUnit(100);
+          const uplift = 1.5;
+          const product = new ConsumerUnit(150);
+
+          expect(cu.uplift(uplift)).toMatchObject(product);
+        });
+      });
+
+      describe("uplift(invalid parameters", () => {
+        it("should reject NON-ConsumerUnit AND NON-NUMBER OR NUMBER <= 1 and throw error", () => {
+          const cu = new ConsumerUnit(100);
+          const notANumber = "I'm Groot";
+          const numberLessThanOne = 0.5;
+          const one = 1;
+
+          expect(() => cu.uplift(notANumber)).toThrowError();
+          expect(() => cu.uplift(numberLessThanOne)).toThrowError();
+          expect(() => cu.uplift(one)).toThrowError();
+        });
+      });
+    });
+
+    describe("deduct(deduct)", () => {
+      describe("deduct(ConsumerUnit)", () => {
+        it("should receive a ConsumerUnit and return the DIFFERENCE", () => {
+          const cu = new ConsumerUnit(100);
+          const deduct = new ConsumerUnit(50);
+          const difference = new ConsumerUnit(150);
+
+          expect(cu.uplift(deduct)).toMatchObject(difference);
+        });
+
+        it("should throw error if the Minuend is smaller than the Subtrahend", () => {
+          const minuend = new ConsumerUnit(70);
+          const subtrahend = new ConsumerUnit(100);
+
+          expect(() => minuend.deduct(subtrahend)).toThrowError();
+        });
+      });
+
+      describe("deduct(0 < number < 1)", () => {
+        it("should receive a number between 0 and 1 (exclusive) and return the PRODUCT", () => {
+          const cu = new ConsumerUnit(100);
+          const deduct = 0.5;
+          const product = new ConsumerUnit(50);
+
+          expect(cu.deduct(deduct)).toMatchObject(product);
+        });
+      });
+
+      describe("deduct(invalid parameters", () => {
+        it("should reject NON-ConsumerUnit AND NON-NUMBER OR NUMBER <=0 or NUMBER >= 1and throw error", () => {
+          const cu = new ConsumerUnit(100);
+          const notANumber = "I'm Groot";
+          const zero = 0;
+          const lessThanZero = -1.5;
+          const one = 1;
+          const largerThanOne = 1.5;
+
+          expect(() => cu.deduct(notANumber)).toThrowError();
+          expect(() => cu.deduct(zero)).toThrowError();
+          expect(() => cu.deduct(lessThanZero)).toThrowError();
+          expect(() => cu.deduct(one)).toThrowError();
+          expect(() => cu.deduct(largerThanOne)).toThrowError();
+        });
+      });
+    });
   });
 });
