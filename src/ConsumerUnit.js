@@ -72,12 +72,12 @@ class ConsumerUnit {
   }
 
   aggregate(addend) {
-    if (!addend instanceof ConsumerUnit) {
+    if (addend instanceof ConsumerUnit) {
+      return new ConsumerUnit(this.amount + addend.amount);
+    } else {
       throw new Error(
         "Aggregate method only accepts ConsumerUnit as parameter"
       );
-    } else {
-      return new ConsumerUnit(this.amount + addend.amount);
     }
   }
 
@@ -113,7 +113,7 @@ class ConsumerUnit {
   deduct(deduct) {
     if (deduct instanceof ConsumerUnit) {
       if (this.amount > deduct.amount) {
-        return this.aggregate(-deduct.amount);
+        return new ConsumerUnit(this.amount - deduct.amount);
       } else {
         throw new Error("Minuend must be >= Subtrahend");
       }

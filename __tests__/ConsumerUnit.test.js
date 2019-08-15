@@ -1,4 +1,4 @@
-const ConsumerUnit = require("../src/value-objects");
+const ConsumerUnit = require("../src/ConsumerUnit");
 
 describe("CONSUMER UNIT", () => {
   describe("Constructor", () => {
@@ -272,9 +272,9 @@ describe("CONSUMER UNIT", () => {
         it("should receive a ConsumerUnit and return the DIFFERENCE", () => {
           const cu = new ConsumerUnit(100);
           const deduct = new ConsumerUnit(50);
-          const difference = new ConsumerUnit(150);
+          const difference = new ConsumerUnit(50);
 
-          expect(cu.uplift(deduct)).toMatchObject(difference);
+          expect(cu.deduct(deduct)).toMatchObject(difference);
         });
 
         it("should throw error if the Minuend is smaller than the Subtrahend", () => {
