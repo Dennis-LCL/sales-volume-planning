@@ -1,4 +1,4 @@
-const ConsumerUnit = require("../src/ConsumerUnit");
+const ConsumerUnit = require("../src/domain/ConsumerUnit");
 
 describe("CONSUMER UNIT", () => {
   describe("Constructor", () => {

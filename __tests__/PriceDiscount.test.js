@@ -1,4 +1,4 @@
-const PriceDiscount = require("../src/PriceDiscount");
+const PriceDiscount = require("../src/domain/PriceDiscount");
 
 describe("PRICE DISCOUNT", () => {
   describe("Constructor", () => {
