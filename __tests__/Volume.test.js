@@ -48,16 +48,36 @@ describe("aggregateVolume", () => {
     const cu = createConsumerUnit(100);
     const number = 10;
     const str = "I'm Groot";
-    const wrongObject = { value: 100, unit: "USD" };
+    const wrongObject1 = { value: 100, unit: "USD" }; // Invalid key (value)
+    const wrongObject2 = { volume: 100, code: "USD" }; // Invalid key (code)
+    const wrongObject3 = { volume: -100, unit: "USD" }; // Negative volume
 
     expect(() => aggregateVolume(cu, number)).toThrowError(
-      "One or more arguements are not valid Volume object"
+      "Arguements should be valid Volume object and of the same unit"
     );
     expect(() => aggregateVolume(cu, str)).toThrowError(
-      "One or more arguements are not valid Volume object"
+      "Arguements should be valid Volume object and of the same unit"
     );
-    expect(() => aggregateVolume(cu, wrongObject)).toThrowError(
-      "One or more arguements are not valid Volume object"
+    expect(() => aggregateVolume(cu, wrongObject1)).toThrowError(
+      "Arguements should be valid Volume object and of the same unit"
+    );
+    expect(() => aggregateVolume(cu, wrongObject2)).toThrowError(
+      "Arguements should be valid Volume object and of the same unit"
+    );
+    expect(() => aggregateVolume(cu, wrongObject3)).toThrowError(
+      "Arguements should be valid Volume object and of the same unit"
+    );
+  });
+
+  it("should throw error if any pass-in arguements have different 'unit' value", () => {
+    const consumerUnit = { volume: 100, unit: "CU" };
+    const caseUnit = { volume: 50, unit: "CS" };
+    const statsUnit = { volume: 30, unit: "SU" };
+
+    expect(() =>
+      aggregateVolume(consumerUnit, caseUnit, statsUnit)
+    ).toThrowError(
+      "Arguements should be valid Volume object and of the same unit"
     );
   });
 });
