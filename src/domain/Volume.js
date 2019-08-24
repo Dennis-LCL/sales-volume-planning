@@ -8,13 +8,22 @@ const createConsumerUnit = (amount = 0) => {
 };
 
 // BEHAVIORS
-// const aggregateVolume = (...volume) => {
-//   const addends = [...volume]
-// }
+const aggregateVolume = (...args) => {
+  const foundErrorInArgs = args.some(arg => arg.volume === undefined);
+
+  if (foundErrorInArgs) {
+    throw new Error("One or more arguements are not valid Volume object");
+  } else {
+    const amount = args
+      .map(arg => arg.volume)
+      .reduce((sum, volume) => (sum += volume));
+    return createConsumerUnit(amount);
+  }
+};
 
 // HELPER FUNCTIONS
 const _isPositiveInteger = param => {
   return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
 };
 
-module.exports = { createConsumerUnit };
+module.exports = { createConsumerUnit, aggregateVolume };
