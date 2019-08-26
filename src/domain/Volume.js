@@ -3,7 +3,7 @@ const createConsumerUnit = (amount = 0) => {
   if (_isPositiveInteger(amount) || amount === 0) {
     return Object.freeze({ volume: amount, unit: "CU" });
   } else {
-    throw new Error("Consumer Unit volume must an integer >= 0");
+    throw new Error("Consumer Unit volume must be an integer >= 0");
   }
 };
 
@@ -18,6 +18,14 @@ const aggregateVolume = (...args) => {
       .map(arg => arg.volume)
       .reduce((sum, volume) => (sum += volume));
     return createConsumerUnit(amount);
+  }
+};
+
+const disaggregateVolume = (dividend, divisor) => {
+  if (_isPositiveInteger(divisor)) {
+    return _spreadEqually(dividend, divisor);
+  } else {
+    throw new Error("Divisor must be a positive integer");
   }
 };
 
@@ -41,4 +49,15 @@ const _foundMultipleUnits = args => {
   return unitSet.size > 1 ? true : false;
 };
 
-module.exports = { createConsumerUnit, aggregateVolume };
+const _spreadEqually = (dividend, divisor) => {
+  const result = new Array(divisor).fill();
+  const quotient = Math.floor(dividend.volume / divisor);
+  let remainder = dividend.volume % divisor;
+
+  return result.map(element => {
+    remainder -= 1;
+    return createConsumerUnit(remainder >= 0 ? quotient + 1 : quotient);
+  });
+};
+
+module.exports = { createConsumerUnit, aggregateVolume, disaggregateVolume };

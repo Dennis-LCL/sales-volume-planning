@@ -1,4 +1,8 @@
-const { createConsumerUnit, aggregateVolume } = require("../src/domain/Volume");
+const {
+  createConsumerUnit,
+  aggregateVolume,
+  disaggregateVolume
+} = require("../src/domain/Volume");
 
 describe("createConsumerUnit", () => {
   it("should only accept ZERO and POSITIVE INTEGER as parameter", () => {
@@ -79,5 +83,110 @@ describe("aggregateVolume", () => {
     ).toThrowError(
       "Arguements should be valid Volume object and of the same unit"
     );
+  });
+});
+
+describe("disaggregateVolume", () => {
+  describe("Equal-Spread", () => {
+    it("should only accept POSITIVE INTEGER as parameter", () => {
+      const dividend = createConsumerUnit(100);
+      const positiveInteger = 2;
+      const zero = 0;
+      const negativeInteger = -2;
+      const positiveFloat = 1.5;
+      const negativeFloat = -1.5;
+      const str = "I'm Groot";
+
+      expect(() =>
+        disaggregateVolume(dividend, positiveInteger)
+      ).not.toThrowError();
+      expect(() => disaggregateVolume(dividend, zero)).toThrowError();
+      expect(() =>
+        disaggregateVolume(dividend, negativeInteger)
+      ).toThrowError();
+      expect(() => disaggregateVolume(dividend, positiveFloat)).toThrowError();
+      expect(() => disaggregateVolume(dividend, negativeFloat)).toThrowError();
+      expect(() => disaggregateVolume(dividend, str)).toThrowError();
+    });
+
+    describe("Remainder === 0", () => {
+      it("should return a list of Volume objects of equal 'volume' and same 'unit'", () => {
+        const dividend = createConsumerUnit(100);
+        const divisor = 5;
+        const result = [
+          { volume: 20, unit: "CU" },
+          { volume: 20, unit: "CU" },
+          { volume: 20, unit: "CU" },
+          { volume: 20, unit: "CU" },
+          { volume: 20, unit: "CU" }
+        ];
+
+        expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
+      });
+    });
+
+    describe("Remainder > 0", () => {
+      it("should return a list of ConsumerUnits with remainder (1) allocated as equally as possible", () => {
+        const dividend = createConsumerUnit(6);
+        const divisor = 5;
+        const result = [
+          { volume: 2, unit: "CU" },
+          { volume: 1, unit: "CU" },
+          { volume: 1, unit: "CU" },
+          { volume: 1, unit: "CU" },
+          { volume: 1, unit: "CU" }
+        ];
+
+        expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
+      });
+
+      it("should return a list of ConsumerUnits with remainder (2) allocated as equally as possible", () => {
+        const dividend = createConsumerUnit(7);
+        const divisor = 5;
+        const result = [
+          { volume: 2, unit: "CU" },
+          { volume: 2, unit: "CU" },
+          { volume: 1, unit: "CU" },
+          { volume: 1, unit: "CU" },
+          { volume: 1, unit: "CU" }
+        ];
+
+        expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
+      });
+
+      it("should return a list of ConsumerUnits with remainder (3) allocated as equally as possible", () => {
+        const dividend = createConsumerUnit(8);
+        const divisor = 5;
+        const result = [
+          { volume: 2, unit: "CU" },
+          { volume: 2, unit: "CU" },
+          { volume: 2, unit: "CU" },
+          { volume: 1, unit: "CU" },
+          { volume: 1, unit: "CU" }
+        ];
+
+        expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
+      });
+
+      it("should return a list of ConsumerUnits with remainder (4) allocated as equally as possible", () => {
+        const dividend = createConsumerUnit(9);
+        const divisor = 5;
+        const result = [
+          { volume: 2, unit: "CU" },
+          { volume: 2, unit: "CU" },
+          { volume: 2, unit: "CU" },
+          { volume: 2, unit: "CU" },
+          { volume: 1, unit: "CU" }
+        ];
+
+        expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
+      });
+    });
+  });
+
+  describe("Weightage-Spread", () => {
+    it("should only accept ARRAY OF FLOATS between 0 and 1 (inclusive)", () => {
+      return true;
+    });
   });
 });
