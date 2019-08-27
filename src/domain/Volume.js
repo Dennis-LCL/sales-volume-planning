@@ -22,12 +22,6 @@ const aggregateVolume = (...args) => {
 };
 
 const disaggregateVolume = (dividend, divisor) => {
-  // if (_isPositiveInteger(divisor)) {
-  //   return _spreadEqually(dividend, divisor);
-  // } else {
-  //   throw new Error("Divisor must be a positive integer");
-  // }
-
   const divisorType = _checkDivisorType(divisor);
 
   switch (divisorType) {
@@ -112,14 +106,12 @@ const _spreadByWeightage = (dividend, divisor) => {
     for (let i = 1; i <= difference; i++) {
       const adjustedVolume = result[result.length - i].volume - 1;
       result[result.length - i] = createConsumerUnit(adjustedVolume);
-      // result[result.length - i].volume -= 1;
     }
   } else if (difference < 0) {
     // If sumOfResult is not enough, add from the beginning of array
     for (let i = 0; i < Math.abs(difference); i++) {
       const adjustedVolume = result[i].volume + 1;
       result[i] = createConsumerUnit(adjustedVolume);
-      // result[i].volume += 1;
     }
   }
 
