@@ -1,7 +1,9 @@
 const {
   createConsumerUnit,
   aggregateVolume,
-  disaggregateVolume
+  disaggregateVolume,
+  upliftVolume,
+  deductVolume
 } = require("../src/domain/Volume");
 
 describe("createConsumerUnit", () => {
@@ -272,6 +274,103 @@ describe("disaggregateVolume", () => {
 
         expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
       });
+    });
+  });
+});
+
+describe("upliftVolume", () => {
+  describe("uplift volume by passing in a Volume object", () => {
+    it("should throw error if any pass-in arguement is NOT a Volume object", () => {
+      const cu = createConsumerUnit(100);
+      const str = "I'm Groot";
+      const wrongObject1 = { value: 100, unit: "USD" }; // Invalid key (value)
+      const wrongObject2 = { volume: 100, code: "USD" }; // Invalid key (code)
+      const wrongObject3 = { volume: -100, unit: "USD" }; // Negative volume
+
+      expect(() => upliftVolume(cu, str)).toThrowError();
+      expect(() => upliftVolume(cu, wrongObject1)).toThrowError();
+      expect(() => upliftVolume(cu, wrongObject2)).toThrowError();
+      expect(() => upliftVolume(cu, wrongObject3)).toThrowError();
+    });
+
+    it("should throw error if any pass-in arguements have different 'unit' value", () => {
+      const consumerUnit = { volume: 100, unit: "CU" };
+      const caseUnit = { volume: 50, unit: "CS" };
+      const statsUnit = { volume: 30, unit: "SU" };
+
+      expect(() => upliftVolume(consumerUnit, caseUnit)).toThrowError();
+      expect(() => upliftVolume(consumerUnit, statsUnit)).toThrowError();
+    });
+
+    it("should receive a Volume object and return the SUMMARY", () => {
+      const cu = createConsumerUnit(100);
+      const uplift = createConsumerUnit(50);
+      const sum = createConsumerUnit(150);
+
+      expect(upliftVolume(cu, uplift)).toMatchObject(sum);
+    });
+  });
+
+  describe("uplift volume by passing in a Multiplier", () => {
+    it("should throw error if uplift is NOT a number > 1", () => {
+      const addend = createConsumerUnit(100);
+      const notANumber = "I'm Groot";
+      const numberLessThanOne = 0.5;
+      const one = 1;
+
+      expect(() => upliftVolume(addend, notANumber)).toThrowError();
+      expect(() => upliftVolume(addend, numberLessThanOne)).toThrowError();
+      expect(() => upliftVolume(addend, one)).toThrowError();
+    });
+
+    it("should receive a number larger than 1 and return the PRODUCT", () => {
+      const cu = createConsumerUnit(100);
+      const upliftMultiplier = 1.5;
+      const product = createConsumerUnit(cu.volume * upliftMultiplier);
+
+      expect(upliftVolume(cu, upliftMultiplier)).toMatchObject(product);
+    });
+  });
+});
+
+describe("deductVolume", () => {
+  describe("deduct volume by passing in a Volume object", () => {
+    it("should throw error if any pass-in arguement is NOT a Volume object", () => {
+      const cu = createConsumerUnit(100);
+      const str = "I'm Groot";
+      const wrongObject1 = { value: 100, unit: "USD" }; // Invalid key (value)
+      const wrongObject2 = { volume: 100, code: "USD" }; // Invalid key (code)
+      const wrongObject3 = { volume: -100, unit: "USD" }; // Negative volume
+
+      expect(() => deductVolume(cu, str)).toThrowError();
+      expect(() => deductVolume(cu, wrongObject1)).toThrowError();
+      expect(() => deductVolume(cu, wrongObject2)).toThrowError();
+      expect(() => deductVolume(cu, wrongObject3)).toThrowError();
+    });
+
+    it("should receive a Volume object and return the DIFFERENCE", () => {
+      const minuend = createConsumerUnit(100);
+      const subtrahend = createConsumerUnit(80);
+      const difference = createConsumerUnit(20);
+
+      expect(deductVolume(minuend, subtrahend)).toMatchObject(difference);
+    });
+
+    it("should throw error if the Minuend is smaller than the Subtrahend", () => {
+      const minuend = createConsumerUnit(70);
+      const subtrahend = createConsumerUnit(100);
+
+      expect(() => deductVolume(minuend, subtrahend)).toThrowError();
+    });
+  });
+
+  describe("deduct volume by passing in a Multiplier", () => {
+    it("should receive a number between 0 and 1 (exclusive) and return the PRODUCT", () => {
+      const cu = createConsumerUnit(100);
+      const deduct = 0.5;
+      const product = createConsumerUnit(50);
+
+      expect(deductVolume(cu, deduct)).toMatchObject(product);
     });
   });
 });

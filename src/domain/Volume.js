@@ -38,6 +38,40 @@ const disaggregateVolume = (dividend, divisor) => {
   }
 };
 
+const upliftVolume = (addend, uplift) => {
+  if (
+    !_foundNonVolumeObject([addend, uplift]) &&
+    !_foundMultipleUnits([addend, uplift])
+  ) {
+    return createConsumerUnit(addend.volume + uplift.volume);
+  } else if (
+    !_foundNonVolumeObject([addend]) &&
+    typeof uplift === "number" &&
+    uplift > 1
+  ) {
+    return createConsumerUnit(addend.volume * uplift);
+  } else {
+    throw new Error("Uplift must be a valid Volume object or a number > 1");
+  }
+};
+
+const deductVolume = (minuend, deduct) => {
+  if (
+    !_foundNonVolumeObject([minuend, deduct]) &&
+    !_foundMultipleUnits([minuend, deduct])
+  ) {
+    if (minuend.volume >= deduct.volume) {
+      return createConsumerUnit(minuend.volume - deduct.volume);
+    } else {
+      throw new Error("Minuend must be larger or equal to Subtrahend");
+    }
+  } else {
+    throw new Error(
+      "Deduct must be a valid Volume object or a number between 0 and 1 (exclusive)"
+    );
+  }
+};
+
 // HELPER FUNCTIONS
 const _isPositiveInteger = param => {
   return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
@@ -118,4 +152,10 @@ const _spreadByWeightage = (dividend, divisor) => {
   return result;
 };
 
-module.exports = { createConsumerUnit, aggregateVolume, disaggregateVolume };
+module.exports = {
+  createConsumerUnit,
+  aggregateVolume,
+  disaggregateVolume,
+  upliftVolume,
+  deductVolume
+};
