@@ -186,7 +186,92 @@ describe("disaggregateVolume", () => {
 
   describe("Weightage-Spread", () => {
     it("should only accept ARRAY OF FLOATS between 0 and 1 (inclusive)", () => {
-      return true;
+      const dividend = createConsumerUnit(100);
+      const zeroAndOne = [0.0, 1.0];
+      const inRange = [0.5, 0.5];
+      const outOfRange = [-0.5, -0.3, 1.8];
+      const notANumber = ["I'm Groot", "I'm Groot", "I'm Groot"];
+
+      expect(() => disaggregateVolume(dividend, zeroAndOne)).not.toThrowError();
+      expect(() => disaggregateVolume(dividend, inRange)).not.toThrowError();
+      expect(() => disaggregateVolume(dividend, outOfRange)).toThrowError();
+      expect(() => disaggregateVolume(dividend, notANumber)).toThrowError();
+    });
+
+    it("should only accept ARRAY OF FLOATS sum up to 1", () => {
+      const dividend = createConsumerUnit(100);
+      const equalToOne = [0.0, 1.0];
+      const largerThanOne = [0.5, 0.8];
+      const lessThanOne = [0.5, 0.3];
+
+      expect(() => disaggregateVolume(dividend, equalToOne)).not.toThrowError();
+      expect(() => disaggregateVolume(dividend, largerThanOne)).toThrowError();
+      expect(() => disaggregateVolume(dividend, lessThanOne)).toThrowError();
+    });
+
+    describe("PRODUCT is a POSITIVE INTEGER or ZERO after applying weightage", () => {
+      it("should return a list of Volume objects by applying weightage x volume", () => {
+        const dividend = createConsumerUnit(10);
+        const divisor = [0.5, 0.3, 0.2];
+        const result = [
+          { volume: 5, unit: "CU" },
+          { volume: 3, unit: "CU" },
+          { volume: 2, unit: "CU" }
+        ];
+
+        expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
+      });
+    });
+
+    describe("PRODUCT is a POSITIVE FLOAT after applying weightage", () => {
+      it("should return a list of ConsumerUnits by rounding each element", () => {
+        const dividend = createConsumerUnit(10);
+        const divisor = [0.55, 0.24, 0.21];
+        const result = [
+          { volume: 6, unit: "CU" },
+          { volume: 2, unit: "CU" },
+          { volume: 2, unit: "CU" }
+        ];
+
+        expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
+      });
+
+      it("should return a list of ConsumerUnits sum up to dividend: SUM of Rounded ConsumerUnits = Dividend", () => {
+        const dividend = createConsumerUnit(10);
+        const divisor = [0.55, 0.25, 0.2];
+        const result = [
+          { volume: 6, unit: "CU" },
+          { volume: 3, unit: "CU" },
+          { volume: 1, unit: "CU" }
+        ];
+
+        expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
+      });
+
+      it("should return a list of ConsumerUnits sum up to dividend: SUM of Rounded ConsumerUnits > Dividend", () => {
+        const dividend = createConsumerUnit(10);
+        const divisor = [0.25, 0.25, 0.25, 0.25];
+        const result = [
+          { volume: 3, unit: "CU" },
+          { volume: 3, unit: "CU" },
+          { volume: 2, unit: "CU" },
+          { volume: 2, unit: "CU" }
+        ];
+
+        expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
+      });
+
+      it("should return a list of ConsumerUnits sum up to dividend: SUM of Rounded ConsumerUnits < Dividend", () => {
+        const dividend = createConsumerUnit(10);
+        const divisor = [0.53, 0.33, 0.14];
+        const result = [
+          { volume: 6, unit: "CU" },
+          { volume: 3, unit: "CU" },
+          { volume: 1, unit: "CU" }
+        ];
+
+        expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
+      });
     });
   });
 });

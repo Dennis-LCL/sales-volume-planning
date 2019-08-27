@@ -22,10 +22,25 @@ const aggregateVolume = (...args) => {
 };
 
 const disaggregateVolume = (dividend, divisor) => {
-  if (_isPositiveInteger(divisor)) {
-    return _spreadEqually(dividend, divisor);
-  } else {
-    throw new Error("Divisor must be a positive integer");
+  // if (_isPositiveInteger(divisor)) {
+  //   return _spreadEqually(dividend, divisor);
+  // } else {
+  //   throw new Error("Divisor must be a positive integer");
+  // }
+
+  const divisorType = _checkDivisorType(divisor);
+
+  switch (divisorType) {
+    case "positive integer":
+      return _spreadEqually(dividend, divisor);
+
+    case "weightage array":
+      return _spreadByWeightage(dividend, divisor);
+
+    case "invalid divisor":
+      throw new Error(
+        "Invalid divisor: must be a positive integer or an array of floats between 0 and 1 (inclusive)"
+      );
   }
 };
 
@@ -49,6 +64,27 @@ const _foundMultipleUnits = args => {
   return unitSet.size > 1 ? true : false;
 };
 
+const _checkDivisorType = divisor => {
+  if (_isPositiveInteger(divisor)) {
+    return "positive integer";
+  } else if (_isValidWeightageArray(divisor)) {
+    return "weightage array";
+  } else {
+    return "invalid divisor";
+  }
+};
+
+const _isValidWeightageArray = array => {
+  const verdict =
+    array.filter(weightage => typeof weightage !== "number").length === 0 &&
+    array.filter(weightage => weightage < 0 || weightage > 1).length === 0 &&
+    array.reduce((total, weightage) => (total += weightage)) === 1
+      ? true
+      : false;
+
+  return verdict;
+};
+
 const _spreadEqually = (dividend, divisor) => {
   const result = new Array(divisor).fill();
   const quotient = Math.floor(dividend.volume / divisor);
@@ -58,6 +94,36 @@ const _spreadEqually = (dividend, divisor) => {
     remainder -= 1;
     return createConsumerUnit(remainder >= 0 ? quotient + 1 : quotient);
   });
+};
+
+const _spreadByWeightage = (dividend, divisor) => {
+  const result = divisor.map(weightage =>
+    createConsumerUnit(Math.round(dividend.volume * weightage))
+  );
+
+  const sumOfResult = result
+    .map(element => element.volume)
+    .reduce((total, volume) => (total += volume));
+
+  const difference = sumOfResult - dividend.volume;
+
+  if (difference > 0) {
+    // If sumOfResult is too much, deduct from the end of array
+    for (let i = 1; i <= difference; i++) {
+      const adjustedVolume = result[result.length - i].volume - 1;
+      result[result.length - i] = createConsumerUnit(adjustedVolume);
+      // result[result.length - i].volume -= 1;
+    }
+  } else if (difference < 0) {
+    // If sumOfResult is not enough, add from the beginning of array
+    for (let i = 0; i < Math.abs(difference); i++) {
+      const adjustedVolume = result[i].volume + 1;
+      result[i] = createConsumerUnit(adjustedVolume);
+      // result[i].volume += 1;
+    }
+  }
+
+  return result;
 };
 
 module.exports = { createConsumerUnit, aggregateVolume, disaggregateVolume };
