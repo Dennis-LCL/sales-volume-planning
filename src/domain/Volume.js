@@ -65,6 +65,13 @@ const deductVolume = (minuend, deduct) => {
     } else {
       throw new Error("Minuend must be larger or equal to Subtrahend");
     }
+  } else if (
+    !_foundNonVolumeObject([minuend]) &&
+    typeof deduct === "number" &&
+    deduct > 0 &&
+    deduct < 1
+  ) {
+    return createConsumerUnit(minuend.volume * deduct);
   } else {
     throw new Error(
       "Deduct must be a valid Volume object or a number between 0 and 1 (exclusive)"

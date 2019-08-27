@@ -365,6 +365,21 @@ describe("deductVolume", () => {
   });
 
   describe("deduct volume by passing in a Multiplier", () => {
+    it("should throw error if deduct is NOT a number between 0 and 1 (exclusive)", () => {
+      const minuend = createConsumerUnit(100);
+      const notANumber = "I'm Groot";
+      const numberLargerThanOne = 1.5;
+      const one = 1;
+      const numberLessThanZero = -1.5;
+      const zero = 0;
+
+      expect(() => deductVolume(minuend, notANumber)).toThrowError();
+      expect(() => deductVolume(minuend, numberLargerThanOne)).toThrowError();
+      expect(() => deductVolume(minuend, one)).toThrowError();
+      expect(() => deductVolume(minuend, numberLessThanZero)).toThrowError();
+      expect(() => deductVolume(minuend, zero)).toThrowError();
+    });
+
     it("should receive a number between 0 and 1 (exclusive) and return the PRODUCT", () => {
       const cu = createConsumerUnit(100);
       const deduct = 0.5;
