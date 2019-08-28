@@ -46,43 +46,34 @@ const upliftVolumeByAmount = (addend, upliftAmount) => {
   }
 };
 
-const upliftVolume = (addend, uplift) => {
-  if (
-    !_foundNonVolumeObject([addend, uplift]) &&
-    !_foundMultipleUnits([addend, uplift])
-  ) {
-    return createConsumerUnit(addend.volume + uplift.volume);
-  } else if (
-    !_foundNonVolumeObject([addend]) &&
-    typeof uplift === "number" &&
-    uplift > 1
-  ) {
-    return createConsumerUnit(addend.volume * uplift);
+const deductVolumeByAmount = (minuend, deductAmount) => {
+  if (_isPositiveInteger(deductAmount) && deductAmount <= minuend.volume) {
+    return _adjustVolumeByAmount(minuend, -deductAmount);
   } else {
-    throw new Error("Uplift must be a valid Volume object or a number > 1");
+    throw new Error(
+      "deductAmount must be a positive integer and <= minuend.volume"
+    );
   }
 };
 
-const deductVolume = (minuend, deduct) => {
+const upliftVolumeByPercentage = (addend, upliftPercentage) => {
+  if (typeof upliftPercentage === "number" && upliftPercentage > 1) {
+    return _adjustVolumeByPercentage(addend, upliftPercentage);
+  } else {
+    throw new Error("upliftPercentage must be a number > 1");
+  }
+};
+
+const deductVolumeByPercentage = (minuend, deductPercentage) => {
   if (
-    !_foundNonVolumeObject([minuend, deduct]) &&
-    !_foundMultipleUnits([minuend, deduct])
+    typeof deductPercentage === "number" &&
+    deductPercentage > 0 &&
+    deductPercentage < 1
   ) {
-    if (minuend.volume >= deduct.volume) {
-      return createConsumerUnit(minuend.volume - deduct.volume);
-    } else {
-      throw new Error("Minuend must be larger or equal to Subtrahend");
-    }
-  } else if (
-    !_foundNonVolumeObject([minuend]) &&
-    typeof deduct === "number" &&
-    deduct > 0 &&
-    deduct < 1
-  ) {
-    return createConsumerUnit(minuend.volume * deduct);
+    return _adjustVolumeByPercentage(minuend, deductPercentage);
   } else {
     throw new Error(
-      "Deduct must be a valid Volume object or a number between 0 and 1 (exclusive)"
+      "deductPercentage must be a number btw. 0 and 1 (exclusive)"
     );
   }
 };
@@ -176,20 +167,19 @@ const _adjustVolumeByAmount = (volumeObject, adjustment) => {
 };
 
 const _adjustVolumeByPercentage = (volumeObject, adjustment) => {
-  return !_foundNonVolumeObject([volumeObject]) &&
-    typeof adjustment === "number" &&
-    adjustment > 0
-    ? createConsumerUnit(volumeObject.volume * adjustment)
-    : new Error(
-        "Must pass in a valid Volume object and a number between 0 and 1 (exclusive)"
-      );
+  if (!_foundNonVolumeObject([volumeObject]) && Math.sign(adjustment) === 1) {
+    return createConsumerUnit(volumeObject.volume * adjustment);
+  } else {
+    throw new Error("Must pass in a valid Volume object and number > 0");
+  }
 };
 
 module.exports = {
   createConsumerUnit,
   aggregateVolume,
   disaggregateVolume,
-  upliftVolume,
   upliftVolumeByAmount,
-  deductVolume
+  upliftVolumeByPercentage,
+  deductVolumeByPercentage,
+  deductVolumeByAmount
 };

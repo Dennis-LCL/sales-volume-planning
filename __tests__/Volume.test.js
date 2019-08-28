@@ -2,9 +2,10 @@ const {
   createConsumerUnit,
   aggregateVolume,
   disaggregateVolume,
-  upliftVolume,
   upliftVolumeByAmount,
-  deductVolume
+  upliftVolumeByPercentage,
+  deductVolumeByAmount,
+  deductVolumeByPercentage
 } = require("../src/domain/Volume");
 
 describe("createConsumerUnit", () => {
@@ -280,7 +281,7 @@ describe("disaggregateVolume", () => {
 });
 
 describe("upliftVolumeByAmount", () => {
-  it.only("should throw error if passed-in arguements are not valid Volume object and a positive integer", () => {
+  it("should throw error if passed-in arguements are not valid Volume object and a positive integer", () => {
     const volumeObject = { volume: 100, unit: "CU" };
     const wrongObject1 = { value: 100, unit: "USD" }; // Invalid key (value)
     const wrongObject2 = { volume: 100, code: "USD" }; // Invalid key (code)
@@ -315,114 +316,119 @@ describe("upliftVolumeByAmount", () => {
   });
 });
 
-describe("upliftVolume", () => {
-  describe("uplift volume by passing in a Volume object", () => {
-    it("should throw error if any pass-in arguement is NOT a Volume object", () => {
-      const cu = createConsumerUnit(100);
-      const str = "I'm Groot";
-      const wrongObject1 = { value: 100, unit: "USD" }; // Invalid key (value)
-      const wrongObject2 = { volume: 100, code: "USD" }; // Invalid key (code)
-      const wrongObject3 = { volume: -100, unit: "USD" }; // Negative volume
+describe("upliftVolumeByPercentage", () => {
+  it("should throw error if passed-in arguements are not valid Volume object and a number > 1", () => {
+    const vo = { volume: 100, unit: "CU" };
+    const badObj1 = { value: 100, unit: "USD" }; // Invalid key (value)
+    const badObj2 = { volume: 100, code: "USD" }; // Invalid key (code)
+    const badObj3 = { volume: -100, unit: "USD" }; // Negative volume
 
-      expect(() => upliftVolume(cu, str)).toThrowError();
-      expect(() => upliftVolume(cu, wrongObject1)).toThrowError();
-      expect(() => upliftVolume(cu, wrongObject2)).toThrowError();
-      expect(() => upliftVolume(cu, wrongObject3)).toThrowError();
-    });
+    const intAdj = 100; // Integer > 1
+    const fltAdj = 1.5; // Float > 1
+    const zero = 0; // Zero
+    const one = 1; // One
+    const negInt = -10; // Negative Integer
+    const negFlt = -10.5; // Negative Float
+    const smFlt = 0.5; // Positive Float < 1
+    const str = "I'm Groot"; // Not A Number
 
-    it("should throw error if any pass-in arguements have different 'unit' value", () => {
-      const consumerUnit = { volume: 100, unit: "CU" };
-      const caseUnit = { volume: 50, unit: "CS" };
-      const statsUnit = { volume: 30, unit: "SU" };
-
-      expect(() => upliftVolume(consumerUnit, caseUnit)).toThrowError();
-      expect(() => upliftVolume(consumerUnit, statsUnit)).toThrowError();
-    });
-
-    it("should receive a Volume object and return the SUMMARY", () => {
-      const cu = createConsumerUnit(100);
-      const uplift = createConsumerUnit(50);
-      const sum = createConsumerUnit(150);
-
-      expect(upliftVolume(cu, uplift)).toMatchObject(sum);
-    });
+    expect(() => upliftVolumeByPercentage(vo, intAdj)).not.toThrowError();
+    expect(() => upliftVolumeByPercentage(vo, fltAdj)).not.toThrowError();
+    expect(() => upliftVolumeByPercentage(badObj1, intAdj)).toThrowError();
+    expect(() => upliftVolumeByPercentage(badObj2, intAdj)).toThrowError();
+    expect(() => upliftVolumeByPercentage(badObj3, intAdj)).toThrowError();
+    expect(() => upliftVolumeByPercentage(vo, zero)).toThrowError();
+    expect(() => upliftVolumeByPercentage(vo, one)).toThrowError();
+    expect(() => upliftVolumeByPercentage(vo, negInt)).toThrowError();
+    expect(() => upliftVolumeByPercentage(vo, negFlt)).toThrowError();
+    expect(() => upliftVolumeByPercentage(vo, smFlt)).toThrowError();
+    expect(() => upliftVolumeByPercentage(vo, str)).toThrowError();
   });
 
-  describe("uplift volume by passing in a Multiplier", () => {
-    it("should throw error if uplift is NOT a number > 1", () => {
-      const addend = createConsumerUnit(100);
-      const notANumber = "I'm Groot";
-      const numberLessThanOne = 0.5;
-      const one = 1;
+  it("should receive a Volume object and a number > 1 and return the PRODUCT", () => {
+    const cu = createConsumerUnit(100);
+    const uplift = 1.5;
+    const product = createConsumerUnit(150);
 
-      expect(() => upliftVolume(addend, notANumber)).toThrowError();
-      expect(() => upliftVolume(addend, numberLessThanOne)).toThrowError();
-      expect(() => upliftVolume(addend, one)).toThrowError();
-    });
-
-    it("should receive a number larger than 1 and return the PRODUCT", () => {
-      const cu = createConsumerUnit(100);
-      const upliftMultiplier = 1.5;
-      const product = createConsumerUnit(cu.volume * upliftMultiplier);
-
-      expect(upliftVolume(cu, upliftMultiplier)).toMatchObject(product);
-    });
+    expect(upliftVolumeByPercentage(cu, uplift)).toMatchObject(product);
   });
 });
 
-describe("deductVolume", () => {
-  describe("deduct volume by passing in a Volume object", () => {
-    it("should throw error if any pass-in arguement is NOT a Volume object", () => {
-      const cu = createConsumerUnit(100);
-      const str = "I'm Groot";
-      const wrongObject1 = { value: 100, unit: "USD" }; // Invalid key (value)
-      const wrongObject2 = { volume: 100, code: "USD" }; // Invalid key (code)
-      const wrongObject3 = { volume: -100, unit: "USD" }; // Negative volume
+describe("deductVolumeByAmount", () => {
+  it("should throw error if passed-in arguements are not valid Volume object and a positive integer", () => {
+    const volumeObject = { volume: 100, unit: "CU" };
+    const wrongObject1 = { value: 100, unit: "USD" }; // Invalid key (value)
+    const wrongObject2 = { volume: 100, code: "USD" }; // Invalid key (code)
+    const wrongObject3 = { volume: -100, unit: "USD" }; // Negative volume
 
-      expect(() => deductVolume(cu, str)).toThrowError();
-      expect(() => deductVolume(cu, wrongObject1)).toThrowError();
-      expect(() => deductVolume(cu, wrongObject2)).toThrowError();
-      expect(() => deductVolume(cu, wrongObject3)).toThrowError();
-    });
+    const adjustment = 100; // Positive Integer
+    const zero = 0; // Zero
+    const negInt = -10; // Negative Integer
+    const posFloat = 10.5; // Positive Float
+    const negFloat = -10.5; // Negative Float
+    const str = "I'm Groot"; // Not A Number
 
-    it("should receive a Volume object and return the DIFFERENCE", () => {
-      const minuend = createConsumerUnit(100);
-      const subtrahend = createConsumerUnit(80);
-      const difference = createConsumerUnit(20);
-
-      expect(deductVolume(minuend, subtrahend)).toMatchObject(difference);
-    });
-
-    it("should throw error if the Minuend is smaller than the Subtrahend", () => {
-      const minuend = createConsumerUnit(70);
-      const subtrahend = createConsumerUnit(100);
-
-      expect(() => deductVolume(minuend, subtrahend)).toThrowError();
-    });
+    expect(() =>
+      deductVolumeByAmount(volumeObject, adjustment)
+    ).not.toThrowError();
+    expect(() => deductVolumeByAmount(wrongObject1, adjustment)).toThrowError();
+    expect(() => deductVolumeByAmount(wrongObject2, adjustment)).toThrowError();
+    expect(() => deductVolumeByAmount(wrongObject3, adjustment)).toThrowError();
+    expect(() => deductVolumeByAmount(volumeObject, zero)).toThrowError();
+    expect(() => deductVolumeByAmount(volumeObject, negInt)).toThrowError();
+    expect(() => deductVolumeByAmount(volumeObject, posFloat)).toThrowError();
+    expect(() => deductVolumeByAmount(volumeObject, negFloat)).toThrowError();
+    expect(() => deductVolumeByAmount(volumeObject, str)).toThrowError();
   });
 
-  describe("deduct volume by passing in a Multiplier", () => {
-    it("should throw error if deduct is NOT a number between 0 and 1 (exclusive)", () => {
-      const minuend = createConsumerUnit(100);
-      const notANumber = "I'm Groot";
-      const numberLargerThanOne = 1.5;
-      const one = 1;
-      const numberLessThanZero = -1.5;
-      const zero = 0;
+  it("should throw error if volume is not sufficient for deduction", () => {
+    const cu = createConsumerUnit(100);
+    const deductToZero = 100;
+    const deductMoreThanCU = 120;
 
-      expect(() => deductVolume(minuend, notANumber)).toThrowError();
-      expect(() => deductVolume(minuend, numberLargerThanOne)).toThrowError();
-      expect(() => deductVolume(minuend, one)).toThrowError();
-      expect(() => deductVolume(minuend, numberLessThanZero)).toThrowError();
-      expect(() => deductVolume(minuend, zero)).toThrowError();
-    });
+    expect(() => deductVolumeByAmount(cu, deductToZero)).not.toThrowError();
+    expect(() => deductVolumeByAmount(cu, deductMoreThanCU)).toThrowError();
+  });
 
-    it("should receive a number between 0 and 1 (exclusive) and return the PRODUCT", () => {
-      const cu = createConsumerUnit(100);
-      const deduct = 0.5;
-      const product = createConsumerUnit(50);
+  it("should receive a Volume object and a positive integer and return the DIFFERENCE", () => {
+    const cu = createConsumerUnit(100);
+    const deduct = 80;
+    const difference = createConsumerUnit(20);
 
-      expect(deductVolume(cu, deduct)).toMatchObject(product);
-    });
+    expect(deductVolumeByAmount(cu, deduct)).toMatchObject(difference);
+  });
+});
+
+describe("deductVolumeByPercentage", () => {
+  it("should throw error if passed-in arguements are not valid Volume object and a number btw. 0 and 1 (exclusive)", () => {
+    const vo = { volume: 100, unit: "CU" };
+    const badObj1 = { value: 100, unit: "USD" }; // Invalid key (value)
+    const badObj2 = { volume: 100, code: "USD" }; // Invalid key (code)
+    const badObj3 = { volume: -100, unit: "USD" }; // Negative volume
+
+    const inRange = 0.5; // Number btw. 0 and 1 (exclusive)
+    const outOfRange1 = -1.5; // Number < 0
+    const outOfRange2 = 1.5; // Number > 1
+    const zero = 0; // Zero
+    const one = 1; // One
+    const str = "I'm Groot"; // Not A Number
+
+    expect(() => deductVolumeByPercentage(vo, inRange)).not.toThrowError();
+    expect(() => deductVolumeByPercentage(badObj1, inRange)).toThrowError();
+    expect(() => deductVolumeByPercentage(badObj2, inRange)).toThrowError();
+    expect(() => deductVolumeByPercentage(badObj3, inRange)).toThrowError();
+    expect(() => deductVolumeByPercentage(vo, outOfRange1)).toThrowError();
+    expect(() => deductVolumeByPercentage(vo, outOfRange2)).toThrowError();
+    expect(() => deductVolumeByPercentage(vo, zero)).toThrowError();
+    expect(() => deductVolumeByPercentage(vo, one)).toThrowError();
+    expect(() => deductVolumeByPercentage(vo, str)).toThrowError();
+  });
+
+  it("should receive a Volume object and a number btw. 0 and 1 (exclusive) and return the PRODUCT", () => {
+    const cu = createConsumerUnit(100);
+    const deduct = 0.5;
+    const product = createConsumerUnit(50);
+
+    expect(deductVolumeByPercentage(cu, deduct)).toMatchObject(product);
   });
 });
