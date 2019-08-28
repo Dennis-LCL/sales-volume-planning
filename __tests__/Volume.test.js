@@ -3,6 +3,7 @@ const {
   aggregateVolume,
   disaggregateVolume,
   upliftVolume,
+  upliftVolumeByAmount,
   deductVolume
 } = require("../src/domain/Volume");
 
@@ -275,6 +276,42 @@ describe("disaggregateVolume", () => {
         expect(disaggregateVolume(dividend, divisor)).toMatchObject(result);
       });
     });
+  });
+});
+
+describe("upliftVolumeByAmount", () => {
+  it.only("should throw error if passed-in arguements are not valid Volume object and a positive integer", () => {
+    const volumeObject = { volume: 100, unit: "CU" };
+    const wrongObject1 = { value: 100, unit: "USD" }; // Invalid key (value)
+    const wrongObject2 = { volume: 100, code: "USD" }; // Invalid key (code)
+    const wrongObject3 = { volume: -100, unit: "USD" }; // Negative volume
+
+    const adjustment = 100; // Positive Integer
+    const zero = 0; // Zero
+    const negInt = -10; // Negative Integer
+    const posFloat = 10.5; // Positive Float
+    const negFloat = -10.5; // Negative Float
+    const str = "I'm Groot"; // Not A Number
+
+    expect(() =>
+      upliftVolumeByAmount(volumeObject, adjustment)
+    ).not.toThrowError();
+    expect(() => upliftVolumeByAmount(wrongObject1, adjustment)).toThrowError();
+    expect(() => upliftVolumeByAmount(wrongObject2, adjustment)).toThrowError();
+    expect(() => upliftVolumeByAmount(wrongObject3, adjustment)).toThrowError();
+    expect(() => upliftVolumeByAmount(volumeObject, zero)).toThrowError();
+    expect(() => upliftVolumeByAmount(volumeObject, negInt)).toThrowError();
+    expect(() => upliftVolumeByAmount(volumeObject, posFloat)).toThrowError();
+    expect(() => upliftVolumeByAmount(volumeObject, negFloat)).toThrowError();
+    expect(() => upliftVolumeByAmount(volumeObject, str)).toThrowError();
+  });
+
+  it("should receive a Volume object and a positive integer and return the SUMMARY", () => {
+    const cu = createConsumerUnit(100);
+    const uplift = 50;
+    const sum = createConsumerUnit(150);
+
+    expect(upliftVolumeByAmount(cu, uplift)).toMatchObject(sum);
   });
 });
 

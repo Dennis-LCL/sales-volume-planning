@@ -38,6 +38,14 @@ const disaggregateVolume = (dividend, divisor) => {
   }
 };
 
+const upliftVolumeByAmount = (addend, upliftAmount) => {
+  if (_isPositiveInteger(upliftAmount)) {
+    return _adjustVolumeByAmount(addend, upliftAmount);
+  } else {
+    throw new Error("upliftAmount must be a positive integer");
+  }
+};
+
 const upliftVolume = (addend, uplift) => {
   if (
     !_foundNonVolumeObject([addend, uplift]) &&
@@ -159,10 +167,29 @@ const _spreadByWeightage = (dividend, divisor) => {
   return result;
 };
 
+const _adjustVolumeByAmount = (volumeObject, adjustment) => {
+  if (!_foundNonVolumeObject([volumeObject]) && Number.isInteger(adjustment)) {
+    return createConsumerUnit(volumeObject.volume + adjustment);
+  } else {
+    throw new Error("Must pass in a valid Volume object and an integer");
+  }
+};
+
+const _adjustVolumeByPercentage = (volumeObject, adjustment) => {
+  return !_foundNonVolumeObject([volumeObject]) &&
+    typeof adjustment === "number" &&
+    adjustment > 0
+    ? createConsumerUnit(volumeObject.volume * adjustment)
+    : new Error(
+        "Must pass in a valid Volume object and a number between 0 and 1 (exclusive)"
+      );
+};
+
 module.exports = {
   createConsumerUnit,
   aggregateVolume,
   disaggregateVolume,
   upliftVolume,
+  upliftVolumeByAmount,
   deductVolume
 };
