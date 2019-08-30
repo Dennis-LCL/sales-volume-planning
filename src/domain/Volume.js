@@ -181,5 +181,6 @@ module.exports = {
   upliftVolumeByAmount,
   upliftVolumeByPercentage,
   deductVolumeByPercentage,
-  deductVolumeByAmount
+  deductVolumeByAmount,
+  _foundNonVolumeObject
 };
