@@ -1,5 +1,7 @@
-const { _foundNonVolumeObject } = require("../domain/Volume.js");
-const { _foundNonBaseListPriceObject } = require("../domain/BaseListPrice");
+const {
+  _foundNonVolumeObject,
+  _foundNonBaseListPriceObject
+} = require("../domain/Utilities.js");
 
 // DATA
 const calculateGIV = (volume, baseListPrice) => {
@@ -9,10 +11,10 @@ const calculateGIV = (volume, baseListPrice) => {
   ) {
     throw new Error("Must pass in valid Volume and BaseListPrice object");
   } else {
-    return {
+    return Object.freeze({
       amount: volume.volume * baseListPrice.amount,
       currency: baseListPrice.currency
-    };
+    });
   }
 };
 

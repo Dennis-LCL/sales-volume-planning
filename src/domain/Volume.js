@@ -1,3 +1,8 @@
+const {
+  _isPositiveInteger,
+  _foundNonVolumeObject
+} = require("../domain/Utilities");
+
 // DATA
 const createConsumerUnit = (amount = 0) => {
   if (_isPositiveInteger(amount) || amount === 0) {
@@ -79,18 +84,18 @@ const deductVolumeByPercentage = (minuend, deductPercentage) => {
 };
 
 // HELPER FUNCTIONS
-const _isPositiveInteger = param => {
-  return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
-};
+// const _isPositiveInteger = param => {
+//   return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
+// };
 
-const _foundNonVolumeObject = args => {
-  return args.some(
-    arg =>
-      arg.volume === undefined ||
-      arg.unit === undefined ||
-      !_isPositiveInteger(arg.volume)
-  );
-};
+// const _foundNonVolumeObject = args => {
+//   return args.some(
+//     arg =>
+//       arg.volume === undefined ||
+//       arg.unit === undefined ||
+//       !_isPositiveInteger(arg.volume)
+//   );
+// };
 
 const _foundMultipleUnits = args => {
   const unitSet = new Set();
@@ -181,6 +186,5 @@ module.exports = {
   upliftVolumeByAmount,
   upliftVolumeByPercentage,
   deductVolumeByPercentage,
-  deductVolumeByAmount,
-  _foundNonVolumeObject
+  deductVolumeByAmount
 };

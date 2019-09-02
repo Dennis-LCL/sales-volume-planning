@@ -8,13 +8,13 @@ const createBaseListPrice = (amount, currency) => {
 };
 
 // HELPER FUNCTIONS
-const _foundNonBaseListPriceObject = args => {
-  return args.some(
-    arg =>
-      arg.amount === undefined ||
-      arg.currency === undefined ||
-      Math.sign(arg.amount) !== 1
-  );
-};
+// const _foundNonBaseListPriceObject = args => {
+//   return args.some(
+//     arg =>
+//       arg.amount === undefined ||
+//       arg.currency === undefined ||
+//       Math.sign(arg.amount) !== 1
+//   );
+// };
 
-module.exports = { createBaseListPrice, _foundNonBaseListPriceObject };
+module.exports = { createBaseListPrice };

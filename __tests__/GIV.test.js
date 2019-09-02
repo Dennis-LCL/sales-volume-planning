@@ -32,4 +32,16 @@ describe("calculateGIV", () => {
     console.log(calculateGIV(volume, blp));
     expect(calculateGIV(volume, blp)).toMatchObject(result);
   });
+
+  it("should make created GIV object immutable", () => {
+    const volume = createConsumerUnit(100);
+    const blp = createBaseListPrice(2.56, "USD");
+    const giv = calculateGIV(volume, blp);
+    const revisedGIV = { amount: 100, currency: "AUD" };
+
+    giv.amount = 100;
+    giv.currency = "AUD";
+
+    expect(giv).not.toMatchObject(revisedGIV);
+  });
 });
