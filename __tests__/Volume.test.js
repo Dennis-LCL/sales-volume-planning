@@ -1,5 +1,5 @@
 const {
-  createConsumerUnit,
+  createVolume,
   aggregateVolume,
   disaggregateVolume,
   upliftVolumeByAmount,
@@ -8,92 +8,118 @@ const {
   deductVolumeByPercentage
 } = require("../src/domain/Volume");
 
-describe("createConsumerUnit", () => {
-  it("should only accept ZERO and POSITIVE INTEGER as parameter", () => {
-    expect(() => createConsumerUnit(0)).not.toThrowError();
-    expect(() => createConsumerUnit(100)).not.toThrowError();
-  });
+describe("createVolume", () => {
+  describe("create a ConsumerUnit Volume object", () => {
+    it("should only accept an INTEGER and a UNIT (CU) as parameters", () => {
+      const posInt = 100;
+      const negInt = -100;
+      const zero = 0;
+      const posFlt = 10.5;
+      const negFlt = -10.5;
+      const str = "I'm Groot";
+      const matchedUnit = "CU";
+      const misMatchedUnit = "SU";
+      const nonStrUnit = 100;
 
-  it("should reject FLOAT & NEGATIVE INTEGER as parameter and throw error", () => {
-    expect(() => createConsumerUnit(100.5)).toThrowError();
-    expect(() => createConsumerUnit(-100.5)).toThrowError();
-    expect(() => createConsumerUnit(-100)).toThrowError();
-  });
+      expect(() => createVolume(posInt, matchedUnit)).not.toThrowError();
+      expect(() => createVolume(negInt, matchedUnit)).not.toThrowError();
+      expect(() => createVolume(zero, matchedUnit)).not.toThrowError();
+      expect(() => createVolume(posFlt, matchedUnit)).toThrowError();
+      expect(() => createVolume(negFlt, matchedUnit)).toThrowError();
+      expect(() => createVolume(str, matchedUnit)).toThrowError();
+      expect(() => createVolume(posInt, misMatchedUnit)).toThrowError();
+      expect(() => createVolume(posInt, nonStrUnit)).toThrowError();
+    });
 
-  it("should create a ConsumerUnit object with amount 0 if no parameter received", () => {
-    const expectedObject = createConsumerUnit(0);
-    const noParamObject = createConsumerUnit();
-    expect(noParamObject).toMatchObject(expectedObject);
-  });
+    it("should return a Volume object with Unit === 'CU'", () => {
+      const result = { volume: 100, unit: "CU" };
 
-  it("should make created Consumer Unit Volume object immutable", () => {
-    const cu = createConsumerUnit(100);
-    const expectedObject = createConsumerUnit(100);
-    cu.volume = 50;
-    expect(cu).toMatchObject(expectedObject);
+      expect(createVolume(100, "CU")).toMatchObject(result);
+    });
+
+    it("should make created Volume object immutable", () => {
+      const cu = createVolume(100, "CU");
+      const volumeObject = { volume: 50, unit: "CS" };
+      cu.volume = 50;
+      cu.unit = "CS";
+      expect(cu).not.toMatchObject(volumeObject);
+    });
   });
 });
 
 describe("aggregateVolume", () => {
-  it("should aggregate 'volume' of 2 Volume objects of the same 'unit", () => {
-    const cu1 = createConsumerUnit(100);
-    const cu2 = createConsumerUnit(50);
-    const expectedVolume = createConsumerUnit(150);
+  describe("aggregate ConsumerUnit Volume object", () => {
+    it("should aggregate 'volume' of 2 Volume objects of the same 'unit", () => {
+      const cu1 = createVolume(100, "CU");
+      const cu2 = createVolume(50, "CU");
+      const expectedVolume = createVolume(150, "CU");
 
-    expect(aggregateVolume(cu1, cu2)).toMatchObject(expectedVolume);
-  });
+      expect(aggregateVolume(cu1, cu2)).toMatchObject(expectedVolume);
+    });
 
-  it("should aggregate 'volume' of 3 Volume objects of the same 'unit", () => {
-    const cu1 = createConsumerUnit(100);
-    const cu2 = createConsumerUnit(50);
-    const cu3 = createConsumerUnit(30);
-    const expectedVolume = createConsumerUnit(180);
+    it("should aggregate 'volume' of 3 Volume objects of the same 'unit", () => {
+      const cu1 = createVolume(100, "CU");
+      const cu2 = createVolume(50, "CU");
+      const cu3 = createVolume(30, "CU");
+      const expectedVolume = createVolume(180, "CU");
 
-    expect(aggregateVolume(cu1, cu2, cu3)).toMatchObject(expectedVolume);
-  });
+      expect(aggregateVolume(cu1, cu2, cu3)).toMatchObject(expectedVolume);
+    });
 
-  it("should throw error if any pass-in arguement is NOT a Volume object", () => {
-    const cu = createConsumerUnit(100);
-    const number = 10;
-    const str = "I'm Groot";
-    const wrongObject1 = { value: 100, unit: "USD" }; // Invalid key (value)
-    const wrongObject2 = { volume: 100, code: "USD" }; // Invalid key (code)
-    const wrongObject3 = { volume: -100, unit: "USD" }; // Negative volume
+    it("should aggregate 'volume' of Volume objects of positive/negative/zero volume", () => {
+      const cuPositive = createVolume(100, "CU");
+      const cuNegative = createVolume(-50, "CU");
+      const cuZero = createVolume(0, "CU");
+      const expectedVolume = createVolume(50, "CU");
 
-    expect(() => aggregateVolume(cu, number)).toThrowError(
-      "Arguements should be valid Volume object and of the same unit"
-    );
-    expect(() => aggregateVolume(cu, str)).toThrowError(
-      "Arguements should be valid Volume object and of the same unit"
-    );
-    expect(() => aggregateVolume(cu, wrongObject1)).toThrowError(
-      "Arguements should be valid Volume object and of the same unit"
-    );
-    expect(() => aggregateVolume(cu, wrongObject2)).toThrowError(
-      "Arguements should be valid Volume object and of the same unit"
-    );
-    expect(() => aggregateVolume(cu, wrongObject3)).toThrowError(
-      "Arguements should be valid Volume object and of the same unit"
-    );
-  });
+      expect(aggregateVolume(cuPositive, cuNegative, cuZero)).toMatchObject(
+        expectedVolume
+      );
+    });
 
-  it("should throw error if any pass-in arguements have different 'unit' value", () => {
-    const consumerUnit = { volume: 100, unit: "CU" };
-    const caseUnit = { volume: 50, unit: "CS" };
-    const statsUnit = { volume: 30, unit: "SU" };
+    it("should throw error if any pass-in arguement is NOT a Volume object", () => {
+      const cu = createVolume(100, "CU");
+      const number = 10;
+      const str = "I'm Groot";
+      const wrongObject1 = { value: 100, unit: "USD" }; // Invalid key (value)
+      const wrongObject2 = { volume: 100, code: "USD" }; // Invalid key (code)
+      const wrongObject3 = { volume: -100, unit: "USD" }; // Negative volume
 
-    expect(() =>
-      aggregateVolume(consumerUnit, caseUnit, statsUnit)
-    ).toThrowError(
-      "Arguements should be valid Volume object and of the same unit"
-    );
+      expect(() => aggregateVolume(cu, number)).toThrowError(
+        "Arguements should be valid Volume object and of the same unit"
+      );
+      expect(() => aggregateVolume(cu, str)).toThrowError(
+        "Arguements should be valid Volume object and of the same unit"
+      );
+      expect(() => aggregateVolume(cu, wrongObject1)).toThrowError(
+        "Arguements should be valid Volume object and of the same unit"
+      );
+      expect(() => aggregateVolume(cu, wrongObject2)).toThrowError(
+        "Arguements should be valid Volume object and of the same unit"
+      );
+      expect(() => aggregateVolume(cu, wrongObject3)).toThrowError(
+        "Arguements should be valid Volume object and of the same unit"
+      );
+    });
+
+    it("should throw error if any pass-in arguements have different 'unit' value", () => {
+      const consumerUnit = { volume: 100, unit: "CU" };
+      const caseUnit = { volume: 50, unit: "CS" };
+      const statsUnit = { volume: 30, unit: "SU" };
+
+      expect(() =>
+        aggregateVolume(consumerUnit, caseUnit, statsUnit)
+      ).toThrowError(
+        "Arguements should be valid Volume object and of the same unit"
+      );
+    });
   });
 });
 
 describe("disaggregateVolume", () => {
   describe("Equal-Spread", () => {
     it("should only accept POSITIVE INTEGER as parameter", () => {
-      const dividend = createConsumerUnit(100);
+      const dividend = createVolume(100, "CU");
       const positiveInteger = 2;
       const zero = 0;
       const negativeInteger = -2;
@@ -115,7 +141,7 @@ describe("disaggregateVolume", () => {
 
     describe("Remainder === 0", () => {
       it("should return a list of Volume objects of equal 'volume' and same 'unit'", () => {
-        const dividend = createConsumerUnit(100);
+        const dividend = createVolume(100, "CU");
         const divisor = 5;
         const result = [
           { volume: 20, unit: "CU" },
@@ -131,7 +157,7 @@ describe("disaggregateVolume", () => {
 
     describe("Remainder > 0", () => {
       it("should return a list of ConsumerUnits with remainder (1) allocated as equally as possible", () => {
-        const dividend = createConsumerUnit(6);
+        const dividend = createVolume(6, "CU");
         const divisor = 5;
         const result = [
           { volume: 2, unit: "CU" },
@@ -145,7 +171,7 @@ describe("disaggregateVolume", () => {
       });
 
       it("should return a list of ConsumerUnits with remainder (2) allocated as equally as possible", () => {
-        const dividend = createConsumerUnit(7);
+        const dividend = createVolume(7, "CU");
         const divisor = 5;
         const result = [
           { volume: 2, unit: "CU" },
@@ -159,7 +185,7 @@ describe("disaggregateVolume", () => {
       });
 
       it("should return a list of ConsumerUnits with remainder (3) allocated as equally as possible", () => {
-        const dividend = createConsumerUnit(8);
+        const dividend = createVolume(8, "CU");
         const divisor = 5;
         const result = [
           { volume: 2, unit: "CU" },
@@ -173,7 +199,7 @@ describe("disaggregateVolume", () => {
       });
 
       it("should return a list of ConsumerUnits with remainder (4) allocated as equally as possible", () => {
-        const dividend = createConsumerUnit(9);
+        const dividend = createVolume(9, "CU");
         const divisor = 5;
         const result = [
           { volume: 2, unit: "CU" },
@@ -190,7 +216,7 @@ describe("disaggregateVolume", () => {
 
   describe("Weightage-Spread", () => {
     it("should only accept ARRAY OF FLOATS between 0 and 1 (inclusive)", () => {
-      const dividend = createConsumerUnit(100);
+      const dividend = createVolume(100, "CU");
       const zeroAndOne = [0.0, 1.0];
       const inRange = [0.5, 0.5];
       const outOfRange = [-0.5, -0.3, 1.8];
@@ -203,7 +229,7 @@ describe("disaggregateVolume", () => {
     });
 
     it("should only accept ARRAY OF FLOATS sum up to 1", () => {
-      const dividend = createConsumerUnit(100);
+      const dividend = createVolume(100, "CU");
       const equalToOne = [0.0, 1.0];
       const largerThanOne = [0.5, 0.8];
       const lessThanOne = [0.5, 0.3];
@@ -215,7 +241,7 @@ describe("disaggregateVolume", () => {
 
     describe("PRODUCT is a POSITIVE INTEGER or ZERO after applying weightage", () => {
       it("should return a list of Volume objects by applying weightage x volume", () => {
-        const dividend = createConsumerUnit(10);
+        const dividend = createVolume(10, "CU");
         const divisor = [0.5, 0.3, 0.2];
         const result = [
           { volume: 5, unit: "CU" },
@@ -229,7 +255,7 @@ describe("disaggregateVolume", () => {
 
     describe("PRODUCT is a POSITIVE FLOAT after applying weightage", () => {
       it("should return a list of ConsumerUnits by rounding each element", () => {
-        const dividend = createConsumerUnit(10);
+        const dividend = createVolume(10, "CU");
         const divisor = [0.55, 0.24, 0.21];
         const result = [
           { volume: 6, unit: "CU" },
@@ -241,7 +267,7 @@ describe("disaggregateVolume", () => {
       });
 
       it("should return a list of ConsumerUnits sum up to dividend: SUM of Rounded ConsumerUnits = Dividend", () => {
-        const dividend = createConsumerUnit(10);
+        const dividend = createVolume(10, "CU");
         const divisor = [0.55, 0.25, 0.2];
         const result = [
           { volume: 6, unit: "CU" },
@@ -253,7 +279,7 @@ describe("disaggregateVolume", () => {
       });
 
       it("should return a list of ConsumerUnits sum up to dividend: SUM of Rounded ConsumerUnits > Dividend", () => {
-        const dividend = createConsumerUnit(10);
+        const dividend = createVolume(10, "CU");
         const divisor = [0.25, 0.25, 0.25, 0.25];
         const result = [
           { volume: 3, unit: "CU" },
@@ -266,7 +292,7 @@ describe("disaggregateVolume", () => {
       });
 
       it("should return a list of ConsumerUnits sum up to dividend: SUM of Rounded ConsumerUnits < Dividend", () => {
-        const dividend = createConsumerUnit(10);
+        const dividend = createVolume(10, "CU");
         const divisor = [0.53, 0.33, 0.14];
         const result = [
           { volume: 6, unit: "CU" },
@@ -308,9 +334,9 @@ describe("upliftVolumeByAmount", () => {
   });
 
   it("should receive a Volume object and a positive integer and return the SUMMARY", () => {
-    const cu = createConsumerUnit(100);
+    const cu = createVolume(100, "CU");
     const uplift = 50;
-    const sum = createConsumerUnit(150);
+    const sum = createVolume(150, "CU");
 
     expect(upliftVolumeByAmount(cu, uplift)).toMatchObject(sum);
   });
@@ -346,9 +372,9 @@ describe("upliftVolumeByPercentage", () => {
   });
 
   it("should receive a Volume object and a number > 1 and return the PRODUCT", () => {
-    const cu = createConsumerUnit(100);
+    const cu = createVolume(100, "CU");
     const uplift = 1.5;
-    const product = createConsumerUnit(150);
+    const product = createVolume(150, "CU");
 
     expect(upliftVolumeByPercentage(cu, uplift)).toMatchObject(product);
   });
@@ -382,7 +408,7 @@ describe("deductVolumeByAmount", () => {
   });
 
   it("should throw error if volume is not sufficient for deduction", () => {
-    const cu = createConsumerUnit(100);
+    const cu = createVolume(100, "CU");
     const deductToZero = 100;
     const deductMoreThanCU = 120;
 
@@ -391,9 +417,9 @@ describe("deductVolumeByAmount", () => {
   });
 
   it("should receive a Volume object and a positive integer and return the DIFFERENCE", () => {
-    const cu = createConsumerUnit(100);
+    const cu = createVolume(100, "CU");
     const deduct = 80;
-    const difference = createConsumerUnit(20);
+    const difference = createVolume(20, "CU");
 
     expect(deductVolumeByAmount(cu, deduct)).toMatchObject(difference);
   });
@@ -425,9 +451,9 @@ describe("deductVolumeByPercentage", () => {
   });
 
   it("should receive a Volume object and a number btw. 0 and 1 (exclusive) and return the PRODUCT", () => {
-    const cu = createConsumerUnit(100);
+    const cu = createVolume(100, "CU");
     const deduct = 0.5;
-    const product = createConsumerUnit(50);
+    const product = createVolume(50, "CU");
 
     expect(deductVolumeByPercentage(cu, deduct)).toMatchObject(product);
   });

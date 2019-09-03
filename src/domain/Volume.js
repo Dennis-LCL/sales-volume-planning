@@ -1,14 +1,15 @@
-const {
-  _isPositiveInteger,
-  _foundNonVolumeObject
-} = require("../domain/Utilities");
+const { _isPositiveInteger } = require("../domain/Utilities");
 
 // DATA
-const createConsumerUnit = (amount = 0) => {
-  if (_isPositiveInteger(amount) || amount === 0) {
-    return Object.freeze({ volume: amount, unit: "CU" });
-  } else {
-    throw new Error("Consumer Unit volume must be an integer >= 0");
+const createVolume = (amount = 0, unit) => {
+  switch (unit) {
+    case "CU":
+      return Number.isInteger(amount)
+        ? _returnFrozenVolumeObject(amount, "CU")
+        : _throwError("ConsumerUnit Volume must be an integer");
+
+    default:
+      return _throwError("Unspecified or undefined Volume unit");
   }
 };
 
@@ -22,7 +23,7 @@ const aggregateVolume = (...args) => {
     const amount = args
       .map(arg => arg.volume)
       .reduce((sum, volume) => (sum += volume));
-    return createConsumerUnit(amount);
+    return createVolume(amount, args[0].unit);
   }
 };
 
@@ -84,18 +85,27 @@ const deductVolumeByPercentage = (minuend, deductPercentage) => {
 };
 
 // HELPER FUNCTIONS
-// const _isPositiveInteger = param => {
-//   return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
-// };
+const _returnFrozenVolumeObject = (amount, unit) => {
+  return Object.freeze({ volume: amount, unit: unit });
+};
 
-// const _foundNonVolumeObject = args => {
-//   return args.some(
-//     arg =>
-//       arg.volume === undefined ||
-//       arg.unit === undefined ||
-//       !_isPositiveInteger(arg.volume)
-//   );
-// };
+const _throwError = message => {
+  throw new Error(message);
+};
+
+const _foundNonVolumeObject = args => {
+  const hasVolumeObjectKeys = args.some(
+    arg => arg.volume !== undefined || arg.unit !== undefined
+  );
+
+  const hasValidVolume = args.some(arg =>
+    arg.unit === "CU"
+      ? !Number.isInteger(arg.amount)
+      : typeof arg.amount !== "number"
+  );
+
+  return hasVolumeObjectKeys && hasValidVolume ? false : true;
+};
 
 const _foundMultipleUnits = args => {
   const unitSet = new Set();
@@ -131,13 +141,16 @@ const _spreadEqually = (dividend, divisor) => {
 
   return result.map(element => {
     remainder -= 1;
-    return createConsumerUnit(remainder >= 0 ? quotient + 1 : quotient);
+    return createVolume(
+      remainder >= 0 ? quotient + 1 : quotient,
+      dividend.unit
+    );
   });
 };
 
 const _spreadByWeightage = (dividend, divisor) => {
   const result = divisor.map(weightage =>
-    createConsumerUnit(Math.round(dividend.volume * weightage))
+    createVolume(Math.round(dividend.volume * weightage), dividend.unit)
   );
 
   const sumOfResult = result
@@ -150,13 +163,13 @@ const _spreadByWeightage = (dividend, divisor) => {
     // If sumOfResult is too much, deduct from the end of array
     for (let i = 1; i <= difference; i++) {
       const adjustedVolume = result[result.length - i].volume - 1;
-      result[result.length - i] = createConsumerUnit(adjustedVolume);
+      result[result.length - i] = createVolume(adjustedVolume, dividend.unit);
     }
   } else if (difference < 0) {
     // If sumOfResult is not enough, add from the beginning of array
     for (let i = 0; i < Math.abs(difference); i++) {
       const adjustedVolume = result[i].volume + 1;
-      result[i] = createConsumerUnit(adjustedVolume);
+      result[i] = createVolume(adjustedVolume, dividend.unit);
     }
   }
 
@@ -165,7 +178,7 @@ const _spreadByWeightage = (dividend, divisor) => {
 
 const _adjustVolumeByAmount = (volumeObject, adjustment) => {
   if (!_foundNonVolumeObject([volumeObject]) && Number.isInteger(adjustment)) {
-    return createConsumerUnit(volumeObject.volume + adjustment);
+    return createVolume(volumeObject.volume + adjustment, volumeObject.unit);
   } else {
     throw new Error("Must pass in a valid Volume object and an integer");
   }
@@ -173,14 +186,14 @@ const _adjustVolumeByAmount = (volumeObject, adjustment) => {
 
 const _adjustVolumeByPercentage = (volumeObject, adjustment) => {
   if (!_foundNonVolumeObject([volumeObject]) && Math.sign(adjustment) === 1) {
-    return createConsumerUnit(volumeObject.volume * adjustment);
+    return createVolume(volumeObject.volume * adjustment, volumeObject.unit);
   } else {
     throw new Error("Must pass in a valid Volume object and number > 0");
   }
 };
 
 module.exports = {
-  createConsumerUnit,
+  createVolume,
   aggregateVolume,
   disaggregateVolume,
   upliftVolumeByAmount,

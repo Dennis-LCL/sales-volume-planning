@@ -1,14 +1,9 @@
-const _isPositiveInteger = param => {
-  return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
+const _isInteger = param => {
+  return Number.isInteger(param);
 };
 
-const _foundNonVolumeObject = args => {
-  return args.some(
-    arg =>
-      arg.volume === undefined ||
-      arg.unit === undefined ||
-      !_isPositiveInteger(arg.volume)
-  );
+const _isPositiveInteger = param => {
+  return Number.isInteger(param) && Math.sign(param) === 1 ? true : false;
 };
 
 const _foundNonBaseListPriceObject = args => {
@@ -21,7 +16,7 @@ const _foundNonBaseListPriceObject = args => {
 };
 
 module.exports = {
+  _isInteger,
   _isPositiveInteger,
-  _foundNonVolumeObject,
   _foundNonBaseListPriceObject
 };
