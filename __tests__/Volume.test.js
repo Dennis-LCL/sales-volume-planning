@@ -45,6 +45,43 @@ describe("createVolume", () => {
       expect(cu).not.toMatchObject(volumeObject);
     });
   });
+
+  describe("create a Case Volume object", () => {
+    it("should only accept a NUMBER and a UNIT (CS) as parameters", () => {
+      const posInt = 100;
+      const negInt = -100;
+      const zero = 0;
+      const posFlt = 10.5;
+      const negFlt = -10.5;
+      const str = "I'm Groot";
+      const matchedUnit = "CS";
+      const misMatchedUnit = "SU";
+      const nonStrUnit = 100;
+
+      expect(() => createVolume(posInt, matchedUnit)).not.toThrowError();
+      expect(() => createVolume(negInt, matchedUnit)).not.toThrowError();
+      expect(() => createVolume(zero, matchedUnit)).not.toThrowError();
+      expect(() => createVolume(posFlt, matchedUnit)).not.toThrowError();
+      expect(() => createVolume(negFlt, matchedUnit)).not.toThrowError();
+      expect(() => createVolume(str, matchedUnit)).toThrowError();
+      expect(() => createVolume(posInt, misMatchedUnit)).toThrowError();
+      expect(() => createVolume(posInt, nonStrUnit)).toThrowError();
+    });
+
+    it("should return a Volume object with Unit === 'CS'", () => {
+      const result = { volume: 100, unit: "CS" };
+
+      expect(createVolume(100, "CS")).toMatchObject(result);
+    });
+
+    it("should make created Volume object immutable", () => {
+      const cs = createVolume(100, "CS");
+      const volumeObject = { volume: 50, unit: "CS" };
+      cs.volume = 50;
+      cs.unit = "CS";
+      expect(cs).not.toMatchObject(volumeObject);
+    });
+  });
 });
 
 describe("aggregateVolume", () => {

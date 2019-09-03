@@ -8,6 +8,11 @@ const createVolume = (amount = 0, unit) => {
         ? _returnFrozenVolumeObject(amount, "CU")
         : _throwError("ConsumerUnit Volume must be an integer");
 
+    case "CS":
+      return typeof amount === "number"
+        ? _returnFrozenVolumeObject(amount, "CS")
+        : _throwError("Case Volume must be a number");
+
     default:
       return _throwError("Unspecified or undefined Volume unit");
   }
